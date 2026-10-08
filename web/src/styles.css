@@ -61,6 +61,14 @@ p { margin: 0; }
 .wordmark i { font: 700 24px/1 var(--deva); font-style: normal; padding-left: 12px; border-left: 1.5px solid var(--ink); }
 .wordmark svg { position: absolute; left: 0; bottom: -10px; width: 62%; height: 10px; overflow: visible; }
 .nav { display: flex; gap: 18px; align-items: center; }
+/* phones: the links take a second row under the wordmark, so both always show */
+@media (max-width: 599px) {
+  .masthead { flex-wrap: wrap; row-gap: 4px; }
+  .nav { order: 3; width: 100%; gap: 20px; }
+  .nav .ink { min-height: 40px; font-size: 15px; }
+  .nav .btn.round { position: absolute; right: 0; top: 0; }
+  .masthead { position: relative; }
+}
 @media (min-width: 1024px) { .wordmark b { font-size: 48px; } .wordmark i { font-size: 40px; } }
 
 /* ---------- ink links: hand-drawn underline that redraws on hover ---------- */
