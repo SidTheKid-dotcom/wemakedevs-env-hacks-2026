@@ -49,6 +49,7 @@ const step = (id: string, cmd: string, timeoutMin: number, memoryMb: number) => 
 const crawl = step("Crawl", "vachan.crawl.handler", 15, 1024);
 const readPdf = step("Process", "vachan.process.handler", 15, 2048);
 const publish = step("Publish", "vachan.publish.handler", 5, 1024);
+const proof = step("Proof", "vachan.proof.handler", 15, 2048);
 readPdf.addToRolePolicy(new iam.PolicyStatement({
   actions: ["bedrock:InvokeModel"],
   resources: ["arn:aws:bedrock:*::foundation-model/*", `arn:aws:bedrock:*:${stack.account}:inference-profile/*`],
@@ -67,7 +68,8 @@ const pipeline = new sfn.StateMachine(stack, "Pipeline", {
   definitionBody: sfn.DefinitionBody.fromChainable(
     new tasks.LambdaInvoke(stack, "CrawlParivesh", { lambdaFunction: crawl, payloadResponseOnly: true, resultPath: "$.crawl" })
       .next(readEach)
-      .next(new tasks.LambdaInvoke(stack, "PublishJson", { lambdaFunction: publish, payloadResponseOnly: true }))),
+      .next(new tasks.LambdaInvoke(stack, "PublishJson", { lambdaFunction: publish, payloadResponseOnly: true }))
+      .next(new tasks.LambdaInvoke(stack, "ProveQuotes", { lambdaFunction: proof, payloadResponseOnly: true }))),
   timeout: cdk.Duration.hours(3),
 });
 new events.Rule(stack, "Nightly", {
@@ -111,7 +113,7 @@ new budgets.CfnBudgetsAction(stack, "StopAt50", {
   executionRoleArn: budgetsRole.roleArn,
   definition: { iamActionDefinition: {
     policyArn: stopSpending.managedPolicyArn,
-    roles: [crawl, readPdf, publish, letter].map((fn) => fn.role!.roleName),
+    roles: [crawl, readPdf, publish, proof, letter].map((fn) => fn.role!.roleName),
   } },
   subscribers: [{ type: "SNS", address: `arn:aws:sns:us-east-1:${stack.account}:vachan-budget-alerts` }],
 });
