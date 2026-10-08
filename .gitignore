@@ -1,0 +1,16 @@
+node_modules/
+.env*
+cdk.out/
+.amplify/
+amplify_outputs.json
+data/minutes_pdf/
+__pycache__/
+.DS_Store
+AGENTS.md
+CLAUDE.md
+.agents/
+.claude/
+docs/
+scripts/
+data/*
+!data/geo/
