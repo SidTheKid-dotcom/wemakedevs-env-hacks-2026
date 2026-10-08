@@ -27,14 +27,17 @@ export function onFrame(f: Frame) {
 export const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 export const finePointer = () => matchMedia("(pointer: fine)").matches;
 
-/** Pointer position, -1..1 from the window centre; returns to 0 when the mouse leaves. */
-export const pointer = { x: 0, y: 0 };
+/** Mouse position in px and its velocity in px/s (smoothed); speed decays when the mouse stops. */
+export const pointer = { px: -1e4, py: -1e4, vx: 0, vy: 0, t: 0 };
 addEventListener("pointermove", (e) => {
   if (e.pointerType !== "mouse") return;
-  pointer.x = (e.clientX / innerWidth - 0.5) * 2;
-  pointer.y = (e.clientY / innerHeight - 0.5) * 2;
-});
-document.addEventListener("mouseleave", () => Object.assign(pointer, { x: 0, y: 0 }));
+  const now = performance.now(), dt = Math.max(8, now - pointer.t) / 1000;
+  if (pointer.px < -9000) Object.assign(pointer, { px: e.clientX, py: e.clientY }); // first move: no jump
+  pointer.vx = pointer.vx * 0.5 + ((e.clientX - pointer.px) / dt) * 0.5;
+  pointer.vy = pointer.vy * 0.5 + ((e.clientY - pointer.py) / dt) * 0.5;
+  Object.assign(pointer, { px: e.clientX, py: e.clientY, t: now });
+}, { passive: true });
+document.addEventListener("mouseleave", () => Object.assign(pointer, { px: -1e4, py: -1e4, vx: 0, vy: 0 }));
 
 export const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 export const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);

@@ -1,6 +1,6 @@
 // Masthead, dialog sheet, and the loading / empty / error states (SPEC 5.9, 6.5, 7.4).
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { Compost } from "./Compost";
 import { Underline } from "./Ink";
 
@@ -25,8 +25,8 @@ export function Masthead({ children, search = false }: { children?: ReactNode; s
         {search && <Link className="btn round" to="/#search" aria-label="Search projects and addresses">
           <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="none" stroke="#fff" strokeWidth="2.6" /><path d="M15 15l5.5 5.5" stroke="#fff" strokeWidth="2.8" strokeLinecap="round" /></svg>
         </Link>}
-        <Link className={`ink${search ? " only-wide" : ""}`} to="/how"><Roll text="How it works" /></Link>
-        <Link className="ink only-wide" to="/officer"><Roll text="Officer view" /></Link>
+        <NavLink className={`ink${search ? " only-wide" : ""}`} to="/how"><Roll text="How it works" /></NavLink>
+        <NavLink className="ink only-wide" to="/officer"><Roll text="Officer view" /></NavLink>
       </nav>
     </header>
   );

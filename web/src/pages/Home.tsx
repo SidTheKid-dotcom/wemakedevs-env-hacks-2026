@@ -47,16 +47,17 @@ export default function Home() {
       <Masthead />
       <section className="hero">
         <div className="hero-text">
-          {stats.data ? <p className="total label">
-            Wet waste promised in writing, Pune: <b>{kg(stats.data.wet_kg_day_total)} kg a day</b>{" "}
-            <Link className="ink" to="/how#data">how we count</Link>
-          </p> : !stats.error && <p className="total label sub">Pune total is loading…</p>}
+          {stats.data ? <div className="total label">
+            <p>Wet waste promised in writing, Pune: <b>{kg(stats.data.wet_kg_day_total)} kg a day</b></p>
+            <p className="total-sub">{stats.data.counted_projects} projects checked, {stats.data.review_count} waiting for a person · as of {shortDate(stats.data.published_at.slice(0, 10))} ·{" "}
+              <Link className="ink" to="/how#data">how we count</Link></p>
+          </div> : !stats.error && <p className="total label sub">Pune total is loading…</p>}
           <h1 className="headline">Read the fine print before you pay the fine.</h1>
           <p className="lede">Pune's large housing projects promised the government, in writing, to process their own wet waste on site. VACHAN finds that promise for your building, and the page it is written on.</p>
           <div id="search"><SearchTape value={q || params.get("label") || ""} autoFocus={hash === "#search"} /></div>
           <p className="hand try">try {EXAMPLES.map((e, i) => <span key={e.label}>
             <button className="ink hand linkish" onClick={() => example(e)}>{e.label}</button>{i < EXAMPLES.length - 2 ? ", " : i === EXAMPLES.length - 2 ? " or " : ""}
-          </span>)}</p>
+          </span>)}, or <Link className="ink hand" to="/p/sia-mh-mis-277145-2022">see an example promise →</Link></p>
         </div>
         <div className="hero-map">
           {projects.data ? <PuneMap points={projects.data} focus={focus} radiusKm={radius} />

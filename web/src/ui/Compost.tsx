@@ -26,7 +26,7 @@ export function Compost({ className = "", depth = 0.45, stage: fixedStage, loop 
       el.alt = "";
       el.className = "peel";
       root.appendChild(el);
-      el.style.left = `${(20 + Math.random() * 40).toFixed(0)}%`;
+      el.style.left = `${(38 + Math.random() * 30).toFixed(0)}%`; // over the soil
       drops.push({ el, y: -0.75, v: 0, rot: Math.random() * 90, spin: 90 + Math.random() * 110, landed: 0 });
     };
     dropNow.current = spawn;
@@ -34,7 +34,7 @@ export function Compost({ className = "", depth = 0.45, stage: fixedStage, loop 
     return onFrame((t, dt) => {
       clock += dt;
       if (clock > next) { clock = 0; next = 6 + Math.random() * 3; spawn(); }
-      if (seedling) seedling.style.transform = `translateX(-50%) rotate(${(Math.sin(t / 1000 * 2 * Math.PI / 4.2) * 2).toFixed(2)}deg)`;
+      if (seedling) seedling.style.transform = `rotate(${(Math.sin(t / 1000 * 2 * Math.PI / 4.2) * 2).toFixed(2)}deg)`; // sways about its stem base
       const h = root.clientHeight;
       for (let i = drops.length - 1; i >= 0; i--) {
         const d = drops[i];
@@ -42,7 +42,7 @@ export function Compost({ className = "", depth = 0.45, stage: fixedStage, loop 
           d.v += 7 * dt;
           d.y += d.v * dt;
           d.rot += d.spin * dt;
-          if (d.y >= 0.36) { d.y = 0.36; d.landed = 0.0001; soil = (soil + 1) % 5; root.style.setProperty("--soil", `${soil}px`); }
+          if (d.y >= 0.27) { d.y = 0.27; d.landed = 0.0001; soil = (soil + 1) % 5; root.style.setProperty("--soil", `${soil}px`); }
         } else d.landed += dt;
         const squash = d.landed && d.landed < 0.08 ? 0.85 : 1;
         const sink = d.landed > 0.08 ? Math.min(1, (d.landed - 0.08) / 0.4) : 0;

@@ -2,7 +2,7 @@
 
 Usage: blender -b -P props/render_props.py -- <out_dir> [name ...]
        name may end in "@turn" to render 16 frames rotating -30..+30 degrees (for mouse-driven turning).
-Look: soft clay-and-real-material objects on a kraft desk, seen at a 3/4 angle (50 degrees from above),
+Look: soft clay-and-real-material objects on a kraft desk, seen nearly from above (15 degrees),
 warm key light from the top left, soft fill from the right, contact shadow on a shadow catcher.
 """
 import math
@@ -15,7 +15,7 @@ from mathutils import Vector
 
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else ["/tmp/props"]
 OUT, ONLY = ARGS[0], ARGS[1:]
-TILT = math.radians(50)  # camera angle from straight down: shows the side of the pot, like the mockups
+TILT = math.radians(15)  # nearly straight down, like the paper it lies on (oryzo-style flat lay)
 
 
 # ---------- scene ----------
@@ -332,12 +332,13 @@ def paper_ball():
 
 
 PROPS = {
-    "pot": (pot, 720), "banana": (banana, 320), "eggshell": (eggshell, 240), "tea": (tea, 240), "onion": (onion, 240),
-    "seedling-1": (lambda: seedling(1), 320), "seedling-2": (lambda: seedling(2), 320),
-    "seedling-3": (lambda: seedling(3), 320), "seedling-4": (lambda: seedling(4), 320),
-    "cup": (cup, 560), "paperclip": (paperclip, 240),
-    "leaf-1": (lambda: dry_leaf(1), 360), "leaf-2": (lambda: dry_leaf(2), 360), "leaf-3": (lambda: dry_leaf(3), 360),
-    "soil": (soil_scatter, 560), "paper-ball": (paper_ball, 360),
+    # pixel sizes are about twice the largest display size (sharp at device pixel ratio 2)
+    "pot": (pot, 1000), "banana": (banana, 360), "eggshell": (eggshell, 280), "tea": (tea, 280), "onion": (onion, 280),
+    "seedling-1": (lambda: seedling(1), 520), "seedling-2": (lambda: seedling(2), 520),
+    "seedling-3": (lambda: seedling(3), 520), "seedling-4": (lambda: seedling(4), 520),
+    "cup": (cup, 640), "paperclip": (paperclip, 420),
+    "leaf-1": (lambda: dry_leaf(1), 480), "leaf-2": (lambda: dry_leaf(2), 480), "leaf-3": (lambda: dry_leaf(3), 480),
+    "soil": (soil_scatter, 700), "paper-ball": (paper_ball, 480),
 }
 
 

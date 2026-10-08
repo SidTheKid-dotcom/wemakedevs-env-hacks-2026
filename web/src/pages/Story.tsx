@@ -25,8 +25,8 @@ export function Story({ total }: { total?: number }) {
     const $ = (s: string) => root.querySelector<HTMLElement>(s)!;
     const words = [...root.querySelectorAll<HTMLElement>(".beat")].map((b) => [...b.querySelectorAll<HTMLElement>("span")]);
     const beats = [...root.querySelectorAll<HTMLElement>(".beat")];
-    const [stack, top, hl, line, num, numText, pot, seedling, card, search] =
-      [".s-stack", ".s-top", ".s-hl", ".s-line", ".s-num", ".s-num b", ".s-pot", ".s-seedling", ".s-card", ".s-search"].map($);
+    const [stack, top, hl, line, num, numText, pot, seedling, card, search, fill] =
+      [".s-stack", ".s-top", ".s-hl", ".s-line", ".s-num", ".s-num b", ".s-pot", ".s-seedling", ".s-card", ".s-search", ".s-fill"].map($);
     const peels = [...root.querySelectorAll<HTMLElement>(".s-peel")];
     let lastStage = 0, lastP = -1;
 
@@ -37,6 +37,7 @@ export function Story({ total }: { total?: number }) {
       if (Math.abs(p - lastP) < 0.0004) return;
       lastP = p;
       const small = innerWidth < 1024;
+      fill.style.transform = `scaleY(${p.toFixed(3)})`; // washi-tape progress
 
       BEATS.forEach((b, i) => { // words: blur 6px → clear, staggered 0.01 p; the beat fades as the next begins
         const out = i < BEATS.length - 1 ? span(p, b.to - 0.02, b.to + 0.02) : 0;
@@ -98,7 +99,9 @@ export function Story({ total }: { total?: number }) {
   return (
     <section className="story" ref={section} aria-label="From a page nobody reads to waste processed at source">
       <div className="stage">
-        <a className="ink hand skip" href="#story-end">Skip the story</a>
+        <a className="s-progress" href="#story-end" aria-label="Skip the story">
+          <span className="s-fill" /><span className="s-skip hand">skip</span>
+        </a>
         <div className="s-text">
           {BEATS.map((b, i) => <p key={i} className="beat">{b.text.split(" ").map((w, j) => <span key={j}>{w} </span>)}</p>)}
         </div>
