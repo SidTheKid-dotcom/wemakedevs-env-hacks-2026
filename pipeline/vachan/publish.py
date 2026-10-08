@@ -108,6 +108,7 @@ SUMMARY = ("id", "project_name", "builder", "village", "city", "ward", "lat", "l
 def summary(p: dict) -> dict:
     """The fields lists need: search, map, near me, builder and officer pages link straight to the PDF page."""
     return {**{k: p[k] for k in SUMMARY}, "tenements": p["tenements"], "quote": p["owc_quote"],
+            "zone": p["zone"], "review_reason": p["review_reason"],
             "page": p["source"]["page"], "pdf": p["source"]["mirror_url"]}
 
 
