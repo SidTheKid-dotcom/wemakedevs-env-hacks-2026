@@ -312,3 +312,7 @@
   .how-cols { grid-template-columns: repeat(2, 1fr); column-gap: 48px; }
 }
 @media (min-width: 1024px) { .typed { min-height: 52vh; } }
+
+/* footer nav: phones and small tablets only (the desktop header already shows these links) */
+.foot-nav { position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: 6px 22px; margin-top: 40px; padding-top: 12px; border-top: 1px solid #1d1c1a26; }
+@media (min-width: 1024px) { .foot-nav { display: none; } }

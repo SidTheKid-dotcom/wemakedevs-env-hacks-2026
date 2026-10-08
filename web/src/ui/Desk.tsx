@@ -3,6 +3,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { finePointer, onFrame, pointer, reducedMotion } from "../motion";
 import type React from "react";
 import { tornClip } from "../rough";
+import { NavLink } from "react-router-dom";
 import { Compost } from "./Compost";
 
 export type PropSpec = {
@@ -95,6 +96,12 @@ export function Desk({ props = "plain", pot = true, children }: { props?: keyof 
         {pot && <Compost className={`desk-pot on-${props}`} depth={0.45} />}
         <div className="sheet" style={{ clipPath: CLIP }}>
           <div className="page">{children}</div>
+          {/* phones: the header has no room for every link, so the pages are listed here too */}
+          <nav className="foot-nav" aria-label="Pages">
+            <NavLink className="ink" to="/" end>Search</NavLink>
+            <NavLink className="ink" to="/officer">Officer view</NavLink>
+            <NavLink className="ink" to="/how">How it works</NavLink>
+          </nav>
         </div>
       </div>
     </div>
