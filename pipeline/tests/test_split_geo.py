@@ -45,3 +45,13 @@ def test_locate_pmc_pcmc_and_outside():
     assert locate(18.631111, 73.741944, "Punawale")[:2] == ("PCMC", "52")
     assert locate(19.0760, 72.8777, "Mumbai") == (None, None, None)
     assert locate(None, None, "") == (None, None, None)
+
+
+def test_quote_page_when_item_starts_on_a_page_break():
+    from vachan import checks
+    from vachan.split import page_at
+    text = "intro\n\f  2. P-2   SIA/MH/MIS/200000/2021 Some project\n  Proposal Number SIA/MH/MIS/200000/2021\n" \
+           "\fOperation Phase Wet waste: 500 kg/day OWC\n"
+    (item,) = split(text)
+    _, offset = checks.evidence(item.text, 500)
+    assert item.page == 2 and page_at(text, item.start + offset) == 3

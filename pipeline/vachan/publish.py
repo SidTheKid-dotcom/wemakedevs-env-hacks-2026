@@ -4,6 +4,7 @@ Writes data/stats.json, data/projects.json (summaries) and data/p/<id>.json (ful
 One project per proposal (its newest minutes), then one per site (same point to ~100 m: expansions).
 """
 import json
+import math
 import os
 import re
 from datetime import datetime, timezone
@@ -54,21 +55,37 @@ def project(row: dict) -> dict:
     }
 
 
+def _builder(name) -> str:
+    """'M/s. Pride Builder LLP' and 'Pride Builders LLP' -> 'pride builder'."""
+    words = re.sub(r"[^a-z ]", " ", (name or "").lower().replace("m/s", "")).split()
+    return " ".join(w.rstrip("s") for w in words if w not in {"llp", "pvt", "ltd", "limited", "private", "the"})
+
+
+def _km(a: dict, b: dict) -> float:
+    return 111 * math.hypot(a["lat"] - b["lat"], (a["lon"] - b["lon"]) * math.cos(math.radians(a["lat"])))
+
+
+def same_site(a: dict, b: dict) -> bool:
+    """Expansions repeat a site under a new proposal id: same point, or same builder within 1 km."""
+    if a["city"] != b["city"]:
+        return False
+    d = _km(a, b)
+    return d < 0.1 or (d < 1 and bool(_builder(a["builder"])) and _builder(a["builder"]) == _builder(b["builder"]))
+
+
 def build(rows) -> tuple[list[dict], dict]:
     newest = {}
     for row in rows:  # one row per proposal: its newest minutes
         if row["key"] not in newest or row["date"] > newest[row["key"]]["date"]:
             newest[row["key"]] = row
-    sites = {}
-    for p in map(project, newest.values()):  # one project per site: expansions share the point
-        site = (p["city"], round(p["lat"], 3), round(p["lon"], 3))
-        if site in sites:
-            keep, drop = sorted([sites[site], p], key=lambda x: x["meeting_date"], reverse=True)
-            keep["related_proposal_ids"] += [drop["proposal_id"]] + drop["related_proposal_ids"]
-            sites[site] = keep
+    kept = []
+    for p in sorted(map(project, newest.values()), key=lambda x: x["meeting_date"], reverse=True):
+        same = next((k for k in kept if same_site(k, p)), None)
+        if same:  # an older expansion or amendment of a site we already have: keep the newest only
+            same["related_proposal_ids"] += [p["proposal_id"]] + p["related_proposal_ids"]
         else:
-            sites[site] = p
-    projects = sorted(sites.values(), key=lambda p: -(p["wet_kg_day"] or 0))
+            kept.append(p)
+    projects = sorted(kept, key=lambda p: -(p["wet_kg_day"] or 0))
     counted = [p for p in projects if p["decision"] == "recommended" and p["status"] == "auto"]
     stats = {
         "wet_kg_day_total": round(sum(p["wet_kg_day"] for p in counted)),

@@ -28,3 +28,10 @@ def test_only_recommended_and_checked_records_count():
     ])
     assert stats["wet_kg_day_total"] == 500
     assert stats["review_count"] == 1
+
+
+def test_same_builder_within_1km_is_one_site():
+    a, b = row("1", "2022-01-01", 6244, lat=18.6700), row("2", "2025-01-01", 5223, lat=18.6750)  # ~550 m apart
+    a["record"]["builder"], b["record"]["builder"] = "Pride Builders LLP", "M/s. Pride Builder LLP"
+    projects, stats = build([a, b])
+    assert len(projects) == 1 and stats["wet_kg_day_total"] == 5223

@@ -11,7 +11,7 @@ import boto3
 from vachan import checks
 from vachan.extract import MODEL_ID, extract
 from vachan.geo import latlon, locate
-from vachan.split import split
+from vachan.split import page_at, split
 
 BUCKET = os.environ.get("BUCKET", "")
 TABLE = os.environ.get("TABLE", "")
@@ -40,7 +40,10 @@ def _dynamo(value):
 
 
 def handler(doc, context=None):
-    text = pdf_text(doc["sha256"])
+    try:
+        text = pdf_text(doc["sha256"])
+    except subprocess.CalledProcessError:  # a damaged PDF poppler cannot open (e.g. meeting 47956)
+        return {"sha256": doc["sha256"], "unreadable": True, "items": 0, "pune": 0}
     if len(text.strip()) < 2000:  # no text layer: a scanned PDF
         return {"sha256": doc["sha256"], "scanned": True, "items": 0, "pune": 0}
     table = boto3.resource("dynamodb").Table(TABLE)
@@ -58,7 +61,7 @@ def handler(doc, context=None):
             "key": item.key, "sha256": doc["sha256"],
             "proposal_id": item.proposal_id, "title": item.title, "meeting_id": doc["meeting_id"],
             "date": doc["date"], "source_url": doc["url"],
-            "page": item.page + (item.text.count("\f", 0, offset) if offset else 0),
+            "page": page_at(text, item.start + offset) if offset is not None else item.page,
             "city": city, "ward": ward, "zone": zone, "lat": lat, "lon": lon,
             "record": record, "quote": quote, "checks": result, "status": status, "review_reason": reason,
             "model_id": MODEL_ID, "tokens": usage,
