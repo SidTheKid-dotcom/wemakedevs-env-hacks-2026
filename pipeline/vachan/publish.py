@@ -105,6 +105,12 @@ SUMMARY = ("id", "project_name", "builder", "village", "city", "ward", "lat", "l
            "decision", "meeting_date", "status")
 
 
+def summary(p: dict) -> dict:
+    """The fields lists need: search, map, near me, builder and officer pages link straight to the PDF page."""
+    return {**{k: p[k] for k in SUMMARY}, "tenements": p["tenements"], "quote": p["owc_quote"],
+            "page": p["source"]["page"], "pdf": p["source"]["mirror_url"]}
+
+
 def _put(key: str, body) -> None:
     s3.put_object(Bucket=BUCKET, Key=key, Body=json.dumps(body, ensure_ascii=False).encode(),
                   ContentType="application/json", CacheControl="max-age=300")
@@ -114,6 +120,6 @@ def handler(event=None, context=None):
     projects, stats = build(_plain(r) for r in _rows())
     for p in projects:
         _put(f"data/p/{p['id']}.json", p)
-    _put("data/projects.json", [{k: p[k] for k in SUMMARY} for p in projects])
+    _put("data/projects.json", [summary(p) for p in projects])
     _put("data/stats.json", stats)
     return stats
