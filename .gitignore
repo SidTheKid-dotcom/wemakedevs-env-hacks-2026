@@ -16,3 +16,6 @@ data/*
 !data/geo/
 /design
 .pytest_cache/
+web/dist/
+web/site.zip
+.vite/
