@@ -79,6 +79,7 @@ new events.Rule(stack, "Nightly", {
 
 // Public letter drafting: no login, so it is capped (2 at a time, DAILY_CAP a day).
 const letter = step("Letter", "vachan.letter.handler", 1, 512);
+letter.addEnvironment("DAILY_CAP", "1500"); // about $0.003 a letter: the worst case is about $4.50 a day
 letter.addToRolePolicy(new iam.PolicyStatement({
   actions: ["bedrock:InvokeModel"],
   resources: ["arn:aws:bedrock:*::foundation-model/*", `arn:aws:bedrock:*:${stack.account}:inference-profile/*`],
