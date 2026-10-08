@@ -1,4 +1,4 @@
 # VACHAN (वचन, "promise")
-Pimpri-Chinchwad housing projects promised in writing to process over 350 tonnes of wet waste a day on site. VACHAN reads those public promises with AWS, so residents, buyers and PCMC officers can get that waste processed at source instead of sent to landfill.
+Gets wet waste processed at source. Large housing projects in Pune (PMC and PCMC) promised in writing to process their own wet waste on site. VACHAN reads those public promises with AWS, so residents, buyers and ward officers can get that waste processed at source instead of sent to city plants and landfill.
 
-Spec: `docs/PRD.md`. Design: `docs/ARCHITECTURE.md`.
+Work in progress for WeMakeDevs x AWS Environmental Hacks 2026 (Waste & Energy track).
