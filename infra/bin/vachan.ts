@@ -56,7 +56,7 @@ readPdf.addToRolePolicy(new iam.PolicyStatement({
 // Pipeline: crawl -> read every new PDF in parallel -> publish.
 const readEach = new sfn.DistributedMap(stack, "ReadEachMinutes", {
   itemReader: new sfn.S3JsonItemReader({ bucket, key: "index/todo.json" }),
-  maxConcurrency: 8,                 // stays inside Bedrock's request quota
+  maxConcurrency: 4,                 // Nova Pro allows 50 requests a minute
   toleratedFailurePercentage: 10,    // one broken PDF must not stop the run
   resultPath: sfn.JsonPath.DISCARD,
 });
@@ -74,6 +74,19 @@ new events.Rule(stack, "Nightly", {
   targets: [new targets.SfnStateMachine(pipeline)],
 });
 
+// Public letter drafting: no login, so it is capped (2 at a time, DAILY_CAP a day).
+const letter = step("Letter", "vachan.letter.handler", 1, 512);
+letter.addToRolePolicy(new iam.PolicyStatement({
+  actions: ["bedrock:InvokeModel"],
+  resources: ["arn:aws:bedrock:*::foundation-model/*", `arn:aws:bedrock:*:${stack.account}:inference-profile/*`],
+}));
+(letter.node.defaultChild as lambda.CfnFunction).reservedConcurrentExecutions = 2;
+const letterUrl = letter.addFunctionUrl({
+  authType: lambda.FunctionUrlAuthType.NONE,
+  cors: { allowedOrigins: ["*"], allowedMethods: [lambda.HttpMethod.POST], allowedHeaders: ["content-type"] },
+});
+
+new cdk.CfnOutput(stack, "LetterUrl", { value: letterUrl.url });
 new cdk.CfnOutput(stack, "CdnUrl", { value: `https://${cdn.distributionDomainName}` });
 new cdk.CfnOutput(stack, "BucketName", { value: bucket.bucketName });
 new cdk.CfnOutput(stack, "PipelineArn", { value: pipeline.stateMachineArn });

@@ -7,6 +7,7 @@ import os
 import re
 
 import boto3
+from botocore.config import Config
 
 MODEL_ID = os.environ.get("EXTRACT_MODEL_ID", "apac.amazon.nova-pro-v1:0")
 KEYWORDS = ("Solid Waste", "Wet waste", "Wet garbage", "OWC", "Organic Waste", "compost", "Solar", "Energy saving",
@@ -60,7 +61,8 @@ def trim(text: str, limit: int = 14000) -> str:
 
 def extract(item_text: str, model_id: str = MODEL_ID) -> dict:
     global _bedrock
-    _bedrock = _bedrock or boto3.client("bedrock-runtime", region_name="ap-south-1")
+    _bedrock = _bedrock or boto3.client("bedrock-runtime", region_name="ap-south-1",
+                                        config=Config(retries={"mode": "adaptive", "max_attempts": 10}))
     resp = _bedrock.converse(
         modelId=model_id,
         messages=[{"role": "user", "content": [{"text": PROMPT + trim(item_text)}]}],
