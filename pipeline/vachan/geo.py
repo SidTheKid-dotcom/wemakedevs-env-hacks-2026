@@ -9,7 +9,7 @@ from pathlib import Path
 
 WARDS = Path(__file__).parent / "wards"
 DEGREE = r"[°ᴼº˚o0]?"  # OCR often turns the degree sign into "0" or "o"
-MINUTE = r"['‘’′`]"     # straight and curly quotes both occur
+MINUTE = r"['‘’‟′`]"    # straight and curly quotes both occur
 LEFT_PMC_2024 = ("fursungi", "phursungi", "uruli devachi")  # moved to their own council in 2024
 
 
