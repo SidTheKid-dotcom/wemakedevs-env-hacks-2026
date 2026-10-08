@@ -1,5 +1,6 @@
 // VACHAN on AWS: crawl PARIVESH minutes -> read each PDF with Bedrock -> publish static JSON behind CloudFront.
 import * as cdk from "aws-cdk-lib";
+import * as budgets from "aws-cdk-lib/aws-budgets";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
@@ -84,6 +85,35 @@ letter.addToRolePolicy(new iam.PolicyStatement({
 const letterUrl = letter.addFunctionUrl({
   authType: lambda.FunctionUrlAuthType.NONE,
   cors: { allowedOrigins: ["*"], allowedMethods: [lambda.HttpMethod.POST], allowedHeaders: ["content-type"] },
+});
+
+// Spend guard: at $50 actual spend, AWS Budgets attaches a deny policy to every Lambda role.
+// (The $60 budget itself and its e-mail alerts were made once with the CLI.)
+const stopSpending = new iam.ManagedPolicy(stack, "StopSpending", {
+  statements: [new iam.PolicyStatement({
+    effect: iam.Effect.DENY,
+    actions: ["bedrock:InvokeModel", "textract:*", "states:StartExecution"],
+    resources: ["*"],
+  })],
+});
+const budgetsRole = new iam.Role(stack, "BudgetsActionRole", {
+  assumedBy: new iam.ServicePrincipal("budgets.amazonaws.com"),
+  inlinePolicies: { attach: new iam.PolicyDocument({ statements: [new iam.PolicyStatement({
+    actions: ["iam:AttachRolePolicy", "iam:DetachRolePolicy"], resources: ["*"],
+  })] }) },
+});
+new budgets.CfnBudgetsAction(stack, "StopAt50", {
+  budgetName: "vachan-hackathon-60usd",
+  actionType: "APPLY_IAM_POLICY",
+  actionThreshold: { type: "ABSOLUTE_VALUE", value: 50 },
+  notificationType: "ACTUAL",
+  approvalModel: "AUTOMATIC",
+  executionRoleArn: budgetsRole.roleArn,
+  definition: { iamActionDefinition: {
+    policyArn: stopSpending.managedPolicyArn,
+    roles: [crawl, readPdf, publish, letter].map((fn) => fn.role!.roleName),
+  } },
+  subscribers: [{ type: "SNS", address: `arn:aws:sns:us-east-1:${stack.account}:vachan-budget-alerts` }],
 });
 
 new cdk.CfnOutput(stack, "LetterUrl", { value: letterUrl.url });
