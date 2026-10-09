@@ -24,7 +24,7 @@ p { margin: 0; }
 :focus-visible { outline: 2px solid var(--leaf); outline-offset: 3px; border-radius: 4px; }
 
 /* ---------- desk and sheet ---------- */
-.desk { position: relative; padding: 8px 8px 24px; min-height: 100svh; }
+.desk { position: relative; padding: 8px 8px 24px; min-height: 100svh; overflow-x: clip; } /* props hang past the sheet; clip, unlike hidden, keeps position: sticky working */
 .sheet-wrap { position: relative; margin: 0 auto; max-width: 1360px; }
 .sheet {
   position: relative; z-index: 1; min-height: calc(100svh - 16px); padding: var(--pad);
