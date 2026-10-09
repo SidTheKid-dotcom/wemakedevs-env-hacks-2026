@@ -18,7 +18,7 @@
 .print-btn { min-height: 44px; font-size: 16px; }
 
 /* ---------- promise card ---------- */
-.card { position: relative; display: grid; gap: 22px; }
+.card { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 .card-left, .card-right { display: grid; gap: 12px; align-content: start; min-width: 0; }
 .number { display: inline-block; position: relative; color: var(--ink); text-decoration: none; justify-self: start; margin-top: 6px; }
 .number .big { position: relative; display: inline-block; }
@@ -133,8 +133,8 @@
 .linkish { border: 0; background: none; padding: 0 2px; cursor: pointer; min-height: 44px; }
 
 /* ---------- home ---------- */
-.hero { display: grid; gap: 28px; }
-.hero-text { display: grid; gap: 18px; align-content: start; }
+.hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+.hero-text { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; align-content: start; }
 .total { justify-self: start; font-size: 16px; transform: rotate(-.8deg); }
 .total b { font: 800 20px var(--display); white-space: nowrap; }
 .total .ink { min-height: 0; font: 400 15px var(--hand); }
@@ -180,7 +180,7 @@
 }
 
 /* ---------- results (near me / search) ---------- */
-.results { display: grid; gap: 22px; margin-top: 36px; padding-top: 24px; border-top: 1px dashed #4d473e66; scroll-margin-top: 16px; }
+.results { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; margin-top: 36px; padding-top: 24px; border-top: 1px dashed #4d473e66; scroll-margin-top: 16px; }
 .results h2 { font-size: 30px; }
 .rows { list-style: none; margin: 14px 0 0; padding: 0; }
 .row { display: grid; gap: 2px; padding: 14px 4px; border-bottom: 1px solid #1d1c1a26; color: var(--ink); text-decoration: none; position: relative; overflow: hidden; }
@@ -234,7 +234,7 @@
 .story-static { display: grid; gap: 12px; margin: 48px 0 0; }
 
 /* ---------- builder ---------- */
-.builder { display: grid; gap: 28px; }
+.builder { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
 .builder-side { display: grid; gap: 14px; align-content: start; }
 .builder-side h1 { font-size: 40px; overflow-wrap: anywhere; }
 .total-hl { font: 800 34px var(--display); }
@@ -263,7 +263,7 @@
 .select select { appearance: none; border: 0; background: transparent; font: 17px var(--type); min-height: 48px; padding: 0 40px 0 14px; cursor: pointer; color: var(--ink); }
 .select::after { content: "▾"; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; }
 .officer h1 { font-size: 30px; margin-bottom: 8px; }
-.officer-cols { display: grid; gap: 32px; }
+.officer-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
 .ledger { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 16px; }
 .ledger th { text-align: left; font-weight: 400; color: var(--ink-soft); border-bottom: 1.5px solid var(--ink); padding: 8px 10px; background: var(--paper); position: sticky; top: 0; }
 .ledger td { padding: 12px 10px; border-bottom: 1px solid #1d1c1a40; vertical-align: top; }
@@ -290,7 +290,7 @@
 }
 
 /* ---------- how ---------- */
-.how { display: grid; gap: 22px; }
+.how { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
 .how h1 { font-size: 38px; color: var(--leaf); text-align: center; }
 .fresh { justify-self: center; background: #cfe0c0; text-align: center; }
 .flow { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 30px; }
@@ -299,7 +299,7 @@
 .flow-box b { font: 700 18px var(--type); }
 .flow-icon { width: 64px; height: 64px; }
 .flow-arrow { position: absolute; left: 50%; bottom: -30px; width: 30px; height: 30px; transform: translateX(-50%) rotate(90deg); }
-.how-cols { display: grid; gap: 28px; margin-top: 20px; padding-top: 22px; border-top: 1.5px solid #1d1c1a59; }
+.how-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; margin-top: 20px; padding-top: 22px; border-top: 1.5px solid #1d1c1a59; }
 .how-cols h2 { font-size: 26px; color: var(--leaf); margin-bottom: 10px; }
 .how-cols section { display: grid; gap: 12px; align-content: start; scroll-margin-top: 20px; }
 .proof { justify-self: start; }
