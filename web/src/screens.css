@@ -196,9 +196,10 @@
 .story { position: relative; height: 300vh; margin-top: 48px; }
 @media (min-width: 1024px) { .story { height: 350vh; } }
 .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
-.s-progress { position: absolute; right: -6px; top: 14%; z-index: 5; width: 26px; height: 62%; display: block; text-decoration: none;
-  background: #9fcf8f40; clip-path: polygon(0 1%, 50% 0, 100% 2%, 98% 99%, 50% 100%, 2% 98%); transform: rotate(1.5deg); }
-.s-fill { position: absolute; inset: 0; background: var(--tape); opacity: .75; transform-origin: top; transform: scaleY(0); }
+.s-progress { position: absolute; right: -14px; top: 14%; z-index: 5; width: 44px; height: 62%; display: block; text-decoration: none; }
+.s-progress::before, .s-fill { position: absolute; top: 0; bottom: 0; left: 9px; right: 9px; content: ""; clip-path: polygon(0 1%, 50% 0, 100% 2%, 98% 99%, 50% 100%, 2% 98%); }
+.s-progress::before { background: #9fcf8f40; }
+.s-fill { background: var(--tape); opacity: .75; transform-origin: top; transform: scaleY(0); }
 .s-skip { position: absolute; left: 50%; bottom: -30px; transform: translateX(-50%); font-size: 15px; color: var(--leaf); }
 .s-text { position: absolute; left: 0; top: 7%; width: 100%; height: 30%; }
 .beat { position: absolute; inset: 0; font: 400 26px/1.3 var(--type); }
@@ -324,3 +325,11 @@
 }
 @media (min-width: 1024px) { .typed { min-height: 52vh; } }
 
+
+/* touch screens and narrow windows: every link is at least 44 px tall (the hit area grows, the look stays) */
+@media (pointer: coarse), (max-width: 700px) {
+  .wordmark, .ledger a, .entry a, .plain a, .how-cols a { display: inline-flex; align-items: center; min-height: 44px; }
+  .plain .ink, .ledger .ink, .entry .ink { min-height: 44px; }
+  .total .ink { padding: 10px 6px; margin: -10px -6px; }
+  .ledger td { padding-block: 4px; }
+}

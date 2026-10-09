@@ -65,7 +65,7 @@ p { margin: 0; }
 @media (max-width: 599px) {
   .masthead { flex-wrap: wrap; row-gap: 4px; }
   .nav { order: 3; width: 100%; gap: 20px; }
-  .nav .ink { min-height: 40px; font-size: 15px; }
+  .nav .ink { min-height: 44px; font-size: 15px; }
   .nav .btn.round { position: absolute; right: 0; top: 0; }
   .masthead { position: relative; }
 }
