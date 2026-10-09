@@ -23,9 +23,7 @@ export default function Officer() {
 
   return (
     <Desk props="plain">
-      <Masthead>
-        <button className="btn no-print print-btn" onClick={() => print()}>Print list</button>
-      </Masthead>
+      <Masthead />
       {error ? <ErrorState title="The promise list did not load." detail="The data server did not answer. Try again in a minute." retry={retry} />
         : !data ? <Loading />
           : <div className="officer">
@@ -37,6 +35,7 @@ export default function Officer() {
                 </select>
               </label>
               <span className="hand sub">older ward layout, DataMeet</span>
+              <button className="btn no-print print-btn" onClick={() => print()}>Print list</button>
             </div>
             <div className="officer-cols">
               <section>

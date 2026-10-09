@@ -8,14 +8,14 @@
 .compost .peel { position: absolute; top: 0; width: 30%; pointer-events: none; }
 .desk-pot { width: 104px; right: -34px; top: 196px; z-index: 3; }
 @media (min-width: 1024px) { .desk-pot { width: 300px; right: -70px; top: auto; bottom: 30px; } }
-@media (max-width: 1023px) { .desk-pot.on-home { display: none; } }
+@media (max-width: 1023px) { .desk-pot.on-home, .desk-pot.on-plain { display: none; } } /* on phones the pot would cover the text on these pages */
 .state-pot { position: relative; width: 140px; }
 .state-img { width: 120px; }
 
 /* ---------- masthead pieces ---------- */
 .only-wide { display: none !important; }
 @media (min-width: 1024px) { .only-wide { display: inline-flex !important; } }
-.print-btn { min-height: 44px; font-size: 16px; }
+.print-btn { min-height: 44px; font-size: 16px; margin-left: auto; }
 
 /* ---------- promise card ---------- */
 .card { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
@@ -271,9 +271,10 @@
 .ledger td.num { font: 800 20px var(--display); white-space: nowrap; }
 .ledger a { color: var(--ink); }
 .ledger .ink { color: var(--leaf); min-height: 0; }
-.review-queue { display: grid; gap: 12px; align-content: start; }
+.officer-cols > * { min-width: 0; }
+.review-queue { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-content: start; }
 .review-queue h2 { font: 400 26px var(--hand); }
-.review-slip { display: flex; gap: 12px; padding: 14px; background: var(--label); box-shadow: 0 1px 3px #0003; color: var(--ink); text-decoration: none; transform: rotate(-.4deg); }
+.review-slip { display: flex; gap: 12px; overflow-wrap: anywhere; min-width: 0; padding: 14px; background: var(--label); box-shadow: 0 1px 3px #0003; color: var(--ink); text-decoration: none; transform: rotate(-.4deg); }
 .review-slip:nth-child(odd) { transform: rotate(.5deg); }
 .review-slip svg { flex: 0 0 24px; height: 24px; }
 .review-slip .pencil { font-family: var(--hand); font-weight: 400; color: var(--ink-soft); }
