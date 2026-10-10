@@ -30,6 +30,12 @@ def test_only_recommended_and_checked_records_count():
     assert stats["review_count"] == 1
 
 
+def test_letter_counter_rows_are_skipped():
+    projects, _ = build([row("1", "2020-01-01", 500), {"key": "_letters", "sha256": "2026-10-08", "n": 5},
+                         {"key": "_letters", "sha256": "2026-10-09", "n": 1}])
+    assert [p["proposal_id"] for p in projects] == ["SIA/MH/MIS/1/2020"]
+
+
 def test_same_builder_within_1km_is_one_site():
     a, b = row("1", "2022-01-01", 6244, lat=18.6700), row("2", "2025-01-01", 5223, lat=18.6750)  # ~550 m apart
     a["record"]["builder"], b["record"]["builder"] = "Pride Builders LLP", "M/s. Pride Builder LLP"

@@ -76,6 +76,8 @@ def same_site(a: dict, b: dict) -> bool:
 def build(rows) -> tuple[list[dict], dict]:
     newest = {}
     for row in rows:  # one row per proposal: its newest minutes
+        if row["key"].startswith("_"):  # bookkeeping rows in the same table (letter.py's daily "_letters" counter)
+            continue
         if row["key"] not in newest or row["date"] > newest[row["key"]]["date"]:
             newest[row["key"]] = row
     kept = []
