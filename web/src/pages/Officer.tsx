@@ -1,6 +1,6 @@
 // PCMC ward officer: who to check first this week (SPEC 5.7). A list, never a verdict.
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { getProjects } from "../api";
 import { kg, method, placeName, shortDate } from "../format";
 import { useLoad } from "../useLoad";
@@ -12,7 +12,8 @@ export default function Officer() {
   const { data, error, retry } = useLoad(getProjects, []);
   const pcmc = useMemo(() => (data || []).filter((p) => p.city === "PCMC"), [data]);
   const wards = useMemo(() => [...new Set(pcmc.map((p) => p.ward))].sort((a, b) => +a - +b), [pcmc]);
-  const [ward, setWard] = useState(() => { try { return localStorage.getItem("officer-ward") || "52"; } catch { return "52"; } });
+  const [params] = useSearchParams(); // ?ward=52 comes from a ward clicked on the home map
+  const [ward, setWard] = useState(() => { try { return params.get("ward") || localStorage.getItem("officer-ward") || "52"; } catch { return params.get("ward") || "52"; } });
   useEffect(() => { try { localStorage.setItem("officer-ward", ward); } catch { /* private mode */ } }, [ward]);
   useEffect(() => { document.title = "Which projects to check first | VACHAN"; }, []);
   const inWard = pcmc.filter((p) => p.ward === ward);

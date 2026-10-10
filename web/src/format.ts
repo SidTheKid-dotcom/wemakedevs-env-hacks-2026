@@ -19,6 +19,18 @@ export function placeName(p: Pick<Summary, "project_name" | "village">) {
   if (generic) return p.village ? `Housing project, ${title(p.village)}` : "Housing project";
   return p.village && !name.toLowerCase().includes(p.village.toLowerCase()) ? `${name}, ${title(p.village)}` : name;
 }
+/** Locality names in a village string: "Pandhare Wasti, Punawale, Tal.-Mulshi, Pune-411033" -> ["Pandhare Wasti", "Punawale"]. */
+export function localities(village: string | null | undefined) {
+  return (village || "").split(/[,(]/).map((s) => s.replace(/\d+|[.)]/g, " ").replace(/\s+/g, " ").trim())
+    .filter((s) => s.length > 2 && !/^(pune|pcmc|pmc|maharashtra|india)\b|\b(tal|taluka|dist|district)\b|^(mulshi|haveli|maval)$/i.test(s))
+    .map(title);
+}
+/** The most common locality across projects: names a PCMC ward, whose map file has only a number. */
+export function commonLocality(villages: (string | null)[]) {
+  const n = new Map<string, number>();
+  for (const v of villages) for (const l of new Set(localities(v))) n.set(l, (n.get(l) || 0) + 1);
+  return [...n].sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+}
 export const title = (s: string) => s.toLowerCase().replace(/\b\p{L}/gu, (c) => c.toUpperCase());
 
 /** "In-situ composting" from "Operation Phase Wet waste: 922.61 In-situ Composting". */

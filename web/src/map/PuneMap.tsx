@@ -1,8 +1,8 @@
 // Printed map of Pune (PMC + PCMC wards) with every written promise as an ink dot (SPEC 3, 5.2, 5.3, 7.2).
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { Summary } from "../api";
-import { kg, placeName } from "../format";
+import { commonLocality, kg, localities, method, placeName, tonnes } from "../format";
 import { easeInOut, onFrame, reducedMotion } from "../motion";
 import { rng, smoothPath } from "../rough";
 import { InkPath } from "../ui/Ink";
@@ -14,7 +14,7 @@ const KM = scale / 111; // map units per km
 const FULL = [0, 0, map.width, map.height];
 
 /** A hand-drawn circle of `km` around a point (jittered, slightly open). */
-function inkCircle(cx: number, cy: number, r: number, seed = 5) {
+export function inkCircle(cx: number, cy: number, r: number, seed = 5) {
   const rand = rng(seed);
   const pts: [number, number][] = [];
   for (let i = 0; i <= 64; i++) {
@@ -31,7 +31,11 @@ export function PuneMap({ points, focus, radiusKm = 2, highlight, label = "Map o
   const box = useRef<HTMLDivElement>(null);
   const [vb, setVb] = useState(FULL);
   const [seen, setSeen] = useState(reducedMotion());
-  const [tip, setTip] = useState<{ p: Summary; x: number; y: number } | null>(null);
+  // the label: a dot or a ward, at a point inside the map box; `pinned` when opened by a tap (phones have no hover)
+  const [tip, setTip] = useState<{ dot?: Summary; ward?: string; x: number; y: number; pinned?: boolean } | null>(null);
+  const touch = useMemo(() => matchMedia("(hover: none)").matches, []);
+  const at = (e: React.MouseEvent) => { const r = box.current!.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const wards = useMemo(() => focus ? null : wardStats(points), [points, focus]); // ward totals only on the whole-city map
   const max = useMemo(() => Math.max(1, ...points.filter((p) => p.status !== "review").map((p) => p.wet_kg_day || 0)), [points]);
 
   useEffect(() => { // dots grow in the first time the map is on screen
@@ -61,7 +65,8 @@ export function PuneMap({ points, focus, radiusKm = 2, highlight, label = "Map o
 
   return (
     <div className="map" ref={box}>
-      <svg viewBox={vb.join(" ")} role="img" aria-label={label} preserveAspectRatio="xMidYMid meet">
+      <svg viewBox={vb.join(" ")} role="img" aria-label={label} preserveAspectRatio="xMidYMid meet"
+        onClick={(e) => { if (e.target === e.currentTarget) setTip(null); }}>
         <defs>
           <filter id="riso"><feTurbulence baseFrequency="0.8" numOctaves="2" seed="2" /><feColorMatrix values="0 0 0 0 0.12  0 0 0 0 0.35  0 0 0 0 0.24  0 0 0 0.09 0" /><feComposite in2="SourceGraphic" operator="in" /></filter>
         </defs>
@@ -69,17 +74,30 @@ export function PuneMap({ points, focus, radiusKm = 2, highlight, label = "Map o
         <g className="outline">{[...map.pcmc, ...map.pmc].map((w, i) => <path key={i} d={w.d} />)}</g>
         <g className="wards">{[...map.pcmc, ...map.pmc].map((w, i) => <path key={i} d={w.d} />)}</g>
         <g filter="url(#riso)">{map.pmc.map((w, i) => <path key={i} d={w.d} fill="#1F5A3D" opacity="0.06" />)}</g>
+        {wards && <g className="ward-hit">
+          {(["PCMC", "PMC"] as const).flatMap((city) => map[city === "PCMC" ? "pcmc" : "pmc"].map((w) => {
+            const key = `${city}|${w.ward}`;
+            return <path key={key} d={w.d} className={`${city === "PCMC" ? "pcmc" : ""}${tip?.ward === key ? " on" : ""}`}
+              onMouseEnter={(e) => !touch && setTip({ ward: key, ...at(e) })} onMouseMove={(e) => !touch && tip?.ward === key && setTip({ ward: key, ...at(e) })}
+              onMouseLeave={() => !touch && setTip((t) => (t?.ward === key ? null : t))}
+              onClick={(e) => { if (touch) setTip({ ward: key, ...at(e), pinned: true }); else if (city === "PCMC") nav(`/officer?ward=${w.ward}`); }} />;
+          }))}
+        </g>}
         {points.map((p) => {
           const [x, y] = project(p.lat, p.lon);
           const hollow = p.status === "review";
           const r = (2.5 + 8 * Math.sqrt(Math.min(1, (p.wet_kg_day || 0) / max))) * unit * 0.8;
           const delay = Math.min(700, Math.hypot(x - centre[0], y - centre[1]) / unit * 1.2);
           return (
-            <circle key={p.id} cx={x} cy={y} r={highlight === p.id ? r * 1.6 : r} tabIndex={-1}
-              className={`dot${hollow ? " hollow" : ""}${seen ? " in" : ""}${highlight === p.id ? " hi" : ""}`}
-              style={{ animationDelay: `${delay}ms`, strokeWidth: unit * 1.2 }}
-              onMouseEnter={(e) => setTip({ p, x: e.clientX, y: e.clientY })} onMouseLeave={() => setTip(null)}
-              onClick={() => nav(`/p/${p.id}`)} />
+            <g key={p.id}>
+              <circle cx={x} cy={y} r={highlight === p.id || tip?.dot === p ? r * 1.6 : r}
+                className={`dot${hollow ? " hollow" : ""}${seen ? " in" : ""}${highlight === p.id || tip?.dot === p ? " hi" : ""}`}
+                style={{ animationDelay: `${delay}ms`, strokeWidth: unit * 1.2 }} />
+              {/* a 22 px invisible hit area: the dots themselves are 2-6 px */}
+              <circle cx={x} cy={y} r={Math.max(r, 11 * unit)} className="dot-hit"
+                onMouseEnter={(e) => !touch && setTip({ dot: p, ...at(e) })} onMouseLeave={() => !touch && setTip((t) => (t?.dot === p ? null : t))}
+                onClick={(e) => (touch ? setTip({ dot: p, ...at(e), pinned: true }) : nav(`/p/${p.id}`))} />
+            </g>
           );
         })}
         {Object.entries(map.labels).map(([city, [x, y]]) => (
@@ -93,9 +111,55 @@ export function PuneMap({ points, focus, radiusKm = 2, highlight, label = "Map o
         </>}
       </svg>
       {!focus && <p className="legend hand"><span className="lg-dot" /> bigger dot = more wet waste promised<br /><span className="lg-dot hollow" /> hollow = a person must check</p>}
-      {tip && <span className="label tip" style={{ left: tip.x + 12, top: tip.y - 40, position: "fixed" }}>
-        {kg(tip.p.wet_kg_day)} kg a day, {placeName(tip.p)}
-      </span>}
+      {tip && <Tip tip={tip} wards={wards} boxWidth={box.current?.clientWidth || 0} />}
     </div>
+  );
+}
+
+type WardStat = { name: string; kg: number; city: "PMC" | "PCMC"; ward: string };
+
+/** Per ward: a readable name and the wet waste counted the same way as the city total (recommended, every check passed). */
+function wardStats(points: Summary[]) {
+  const out = new Map<string, WardStat>();
+  const byWard = new Map<string, Summary[]>();
+  for (const p of points) byWard.set(`${p.city}|${p.ward}`, [...(byWard.get(`${p.city}|${p.ward}`) || []), p]);
+  for (const w of map.pmc) { // "01 Dhanori - Vishrantwadi" -> "Ward 1, Dhanori – Vishrantwadi"
+    const m = w.ward.match(/^0*(\d+)\s+(.*)$/);
+    out.set(`PMC|${w.ward}`, { name: m ? `Ward ${m[1]}, ${m[2].replace(/ - /g, " – ")}` : w.ward, kg: 0, city: "PMC", ward: w.ward });
+  }
+  for (const w of map.pcmc) { // the older PCMC layout has numbers only: name it by its most common locality
+    const around = commonLocality((byWard.get(`PCMC|${w.ward}`) || []).map((p) => p.village));
+    out.set(`PCMC|${w.ward}`, { name: `PCMC ward ${w.ward}${around ? `, around ${around}` : ""}`, kg: 0, city: "PCMC", ward: w.ward });
+  }
+  for (const [key, ps] of byWard) {
+    const st = out.get(key);
+    if (st) st.kg = ps.filter((p) => p.decision === "recommended" && p.status === "auto").reduce((a, p) => a + (p.wet_kg_day || 0), 0);
+  }
+  return out;
+}
+
+function Tip({ tip, wards, boxWidth }: { tip: { dot?: Summary; ward?: string; x: number; y: number; pinned?: boolean }; wards: Map<string, WardStat> | null; boxWidth: number }) {
+  const left = Math.max(0, Math.min(tip.x + 12, boxWidth - 250));
+  const style = { left, top: Math.max(0, tip.y - 64) };
+  if (tip.dot) {
+    const p = tip.dot;
+    const where = localities(p.village).at(-1) || placeName(p);
+    return (
+      <span className={`label tip${tip.pinned ? " pinned" : ""}`} style={style}>
+        {p.wet_kg_day == null ? <b className="pencil">A person must check this</b>
+          : <b className={p.status === "review" ? "pencil" : ""}>{kg(p.wet_kg_day)} kg a day</b>}
+        <span>{[where, method(p.quote)?.match(/\((\w+)\)$/)?.[1] || method(p.quote)].filter(Boolean).join(", ")}</span>
+        {tip.pinned && <Link className="ink hand" to={`/p/${p.id}`}>Open the promise</Link>}
+      </span>
+    );
+  }
+  const w = tip.ward && wards?.get(tip.ward);
+  if (!w) return null;
+  return (
+    <span className={`label tip${tip.pinned ? " pinned" : ""}`} style={style}>
+      <b>{w.name}</b>
+      <span>{w.kg ? (w.kg >= 1000 ? `${tonnes(w.kg)} t` : `${kg(w.kg)} kg`) + " of wet waste a day promised" : "No counted promises in this ward"}</span>
+      {tip.pinned && w.city === "PCMC" && <Link className="ink hand" to={`/officer?ward=${w.ward}`}>Check-first list for this ward</Link>}
+    </span>
   );
 }
