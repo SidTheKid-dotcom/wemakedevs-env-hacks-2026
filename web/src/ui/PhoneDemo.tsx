@@ -2,7 +2,9 @@
 // Every number comes from projects.json; the scenes only animate what the real screens show.
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { Summary } from "../api";
-import { builderName, kg, km, method, placeName, title } from "../format";
+import { builderName, kg, km, localities, method, placeName } from "../format";
+import { inkCircle } from "../map/PuneMap";
+import { InkPath } from "./Ink";
 import { reducedMotion } from "../motion";
 
 const PLACE = { title: "Seasons Mall, Hadapsar", lat: 18.5199, lon: 73.9313 }; // Amazon Location's point for this address
@@ -35,7 +37,7 @@ export function PhoneDemo({ projects }: { projects?: Summary[] }) {
     const ward = projects.filter((p) => p.city === "PCMC" && p.ward === WARD && p.status === "auto" && p.decision === "recommended")
       .sort((a, b) => (b.wet_kg_day || 0) - (a.wet_kg_day || 0) || a.meeting_date.localeCompare(b.meeting_date));
     if (!pick || !ward.length) return null;
-    return { count: near.length, pick, ward: ward.slice(0, 3) };
+    return { count: near.length, near, pick, ward: ward.slice(0, 3) };
   }, [projects]);
   const last = data ? SCENES.length - 1 : 0; // without data only the typing scene can play
 
@@ -55,7 +57,7 @@ export function PhoneDemo({ projects }: { projects?: Summary[] }) {
       <div className="phone" aria-hidden="true">
         <div className="screen" key={i}>
           {i === 0 && <SearchScene />}
-          {data && i === 1 && <ResultsScene count={data.count} row={data.pick} />}
+          {data && i === 1 && <ResultsScene count={data.count} row={data.pick} near={data.near} />}
           {data && i === 2 && <CardScene p={data.pick.p} />}
           {data && i === 3 && <LetterScene p={data.pick.p} />}
           {data && i === 4 && <OfficerScene rows={data.ward} />}
@@ -84,31 +86,56 @@ function SearchScene() {
   return (
     <div className="d-pad">
       <Mast />
-      <p className="d-h1">Did your builder promise to process your society's wet waste?</p>
-      <div className="d-input">
-        <span className="d-typed" style={{ "--n": PLACE.title.length, ...d(0.9) } as CSSProperties}>{PLACE.title}</span>
-        <span className="d-caret" />
-        <Tap at={0.4} />
-      </div>
-      <div className="d-btn">Find the promise</div>
-      <div className="d-suggest d-in" style={d(2.5)}>
-        <svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 22s7-7.2 7-12.5A7 7 0 0 0 5 9.5C5 14.8 12 22 12 22z" fill="var(--leaf)" /><circle cx="12" cy="9.5" r="2.6" fill="var(--label)" /></svg>
-        {PLACE.title}, Pune
-        <Tap at={3.4} />
+      <div className="d-body">
+        <p className="d-h1">Did your builder promise to process your society's wet waste?</p>
+        <div className="d-input">
+          <span className="d-typed" style={{ "--n": PLACE.title.length, ...d(0.9) } as CSSProperties}>{PLACE.title}</span>
+          <span className="d-caret" />
+          <Tap at={0.4} />
+        </div>
+        <div className="d-btn">Find the promise</div>
+        <div className="d-suggest d-in" style={d(2.5)}>
+          <svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 22s7-7.2 7-12.5A7 7 0 0 0 5 9.5C5 14.8 12 22 12 22z" fill="var(--leaf)" /><circle cx="12" cy="9.5" r="2.6" fill="var(--label)" /></svg>
+          {PLACE.title}, Pune
+          <Tap at={3.4} />
+        </div>
       </div>
     </div>
   );
 }
 
-function ResultsScene({ count, row }: { count: number; row: { p: Summary; d: number } }) {
+/** The promises around the address, drawn in km around the pin: no words, just where and how much. */
+function MiniMap({ near, pick }: { near: { p: Summary; d: number }[]; pick: Summary }) {
+  const max = Math.max(...near.map((r) => r.p.wet_kg_day || 0), 1);
+  const cos = Math.cos((PLACE.lat * Math.PI) / 180);
+  return (
+    <svg className="d-map" viewBox="-2.3 -2.3 4.6 4.6" aria-hidden="true">
+      <InkPath d={inkCircle(0, 0, 2)} color="var(--leaf)" width={0.035} dur={600} />
+      {near.map(({ p }, n) => {
+        const x = (p.lon - PLACE.lon) * 111 * cos, y = -(p.lat - PLACE.lat) * 111;
+        const r = 0.05 + 0.13 * Math.sqrt((p.wet_kg_day || 0) / max);
+        return <circle key={p.id} cx={x} cy={y} r={p.id === pick.id ? r * 1.5 : r}
+          className={`d-dot${p.status === "review" ? " hollow" : ""}${p.id === pick.id ? " pick" : ""}`} style={d(0.2 + (n % 20) * 0.03)} />;
+      })}
+      <path d="M0 0c-.08-.12-.12-.18-.12-.25a.12.12 0 1 1 .24 0c0 .07-.04.13-.12.25z" fill="var(--rust)" />
+    </svg>
+  );
+}
+
+function ResultsScene({ count, row, near }: { count: number; row: { p: Summary; d: number }; near: { p: Summary; d: number }[] }) {
   return (
     <div className="d-pad">
       <Mast />
-      <p className="d-h2 d-in" style={d(0.1)}>{count} promises within 2 km</p>
-      <div className="d-row pick d-in" style={d(0.6)}>
-        <b>{kg(row.p.wet_kg_day)} kg a day</b>
-        <span>{placeName(row.p)}, {row.d.toFixed(1)} km</span>
-        <Tap at={2.2} />
+      <div className="d-body">
+        <p className="d-h2 d-in" style={d(0.1)}>{count} promises within 2 km</p>
+        <MiniMap near={near} pick={row.p} />
+        <div className="d-row pick d-in" style={d(0.9)}>
+          <b>{kg(row.p.wet_kg_day)} kg a day</b>
+          <span>{placeName(row.p)}, {row.d.toFixed(1)} km</span>
+          <Tap at={2.3} />
+        </div>
+        <i className="d-ghost d-in" style={d(1.1)} />
+        <i className="d-ghost short d-in" style={d(1.2)} />
       </div>
     </div>
   );
@@ -116,19 +143,21 @@ function ResultsScene({ count, row }: { count: number; row: { p: Summary; d: num
 
 function CardScene({ p }: { p: Summary }) {
   return (
-    <div className="d-pad d-card">
+    <div className="d-pad">
       <Mast />
-      <p className="d-place">{placeName(p)}</p>
-      <p className="d-big"><span className="d-hl" style={d(0.5)} />{kg(p.wet_kg_day)} kg</p>
-      <p className="d-sub">of wet waste a day</p>
-      <p className="d-method">{/biogas/i.test(p.quote || "") ? "Processed" : "Composted"} on site: {short(method(p.quote))}</p>
-      <div className="d-clip d-in" style={d(0.9)}>
-        <span className="d-sub">Page {p.page}</span>
-        <span className="d-quote"><span className="d-hl" style={d(1.4)} />{p.quote}</span>
+      <div className="d-body spread">
+        <p className="d-place">{placeName(p)}</p>
+        <div>
+          <p className="d-big"><span className="d-hl" style={d(0.5)} />{kg(p.wet_kg_day)} kg</p>
+          <p className="d-sub">of wet waste a day</p>
+        </div>
+        <p className="d-method">{/biogas/i.test(p.quote || "") ? "Processed" : "Composted"} on site: {short(method(p.quote))}</p>
+        <div className="d-clip d-in" style={d(0.9)}>
+          <span className="d-sub">Page {p.page}</span>
+          <span className="d-quote"><span className="d-hl" style={d(1.4)} />{p.quote}</span>
+        </div>
       </div>
-      <div className="d-actions">
-        <div className="d-btn">Ask for the plant to run<Tap at={3.4} /></div>
-      </div>
+      <div className="d-btn">Ask for the plant to run<Tap at={3.4} /></div>
     </div>
   );
 }
@@ -136,7 +165,7 @@ function CardScene({ p }: { p: Summary }) {
 function LetterScene({ p }: { p: Summary }) {
   const builder = firstName(builderName(p.builder)) || "the builder";
   return (
-    <div className="d-pad d-card">
+    <div className="d-pad">
       <Mast />
       <p className="d-place">{placeName(p)}</p>
       <p className="d-big">{kg(p.wet_kg_day)} kg</p>
@@ -150,7 +179,7 @@ function LetterScene({ p }: { p: Summary }) {
           <div className="d-paper">
             <p>To: {builder}</p>
             <p className="d-quote">“{p.quote}” (page {p.page})</p>
-            {[92, 80, 88, 64].map((w, n) => <i key={n} className="d-line" style={{ width: `${w}%`, ...d(2.8 + n * 0.35) }} />)}
+            {[92, 80, 88, 70, 90, 76, 52].map((w, n) => <i key={n} className="d-line" style={{ width: `${w}%`, ...d(2.7 + n * 0.25) }} />)}
           </div>
           <div className="d-btn">Send on WhatsApp<Tap at={4.9} /></div>
         </div>
@@ -163,14 +192,16 @@ function OfficerScene({ rows }: { rows: Summary[] }) {
   return (
     <div className="d-pad">
       <Mast><span className="d-navon">Ward officers</span></Mast>
-      <p className="d-h2 d-in" style={d(0.1)}>Ward {WARD}: check first</p>
-      {rows.map((p, n) => (
-        <div key={p.id} className="d-led d-in" style={d(0.4 + n * 0.25)}>
-          <span className="hand">{n + 1}</span>
-          <span>{area(p)}</span>
-          <b>{kg(p.wet_kg_day)} kg</b>
-        </div>
-      ))}
+      <div className="d-body">
+        <p className="d-ward d-in" style={d(0.1)}>Ward {WARD}<span className="hand">check first</span></p>
+        {rows.map((p, n) => (
+          <div key={p.id} className="d-led d-in" style={d(0.4 + n * 0.25)}>
+            <span className="hand">{n + 1}</span>
+            <span>{area(p)}</span>
+            <b>{kg(p.wet_kg_day)} kg</b>
+          </div>
+        ))}
+      </div>
       <div className="d-btn">Print this list<Tap at={2.7} /></div>
       <div className="d-print">
         <p><b>Check first: PCMC ward {WARD}</b></p>
@@ -180,9 +211,9 @@ function OfficerScene({ rows }: { rows: Summary[] }) {
   );
 }
 
-/** "punawale, pune" -> "Punawale": the village alone, for short rows. */
+/** "Pandhare Wasti, Punawale, Pune" -> "Punawale": the locality alone, for short rows. */
 function area(p: Summary) {
-  return p.village ? title(p.village.split(",")[0].trim()) : placeName(p);
+  return localities(p.village).at(-1) || placeName(p);
 }
 /** "Organic waste converter (OWC)" -> "OWC"; other methods stay as they are. */
 function short(m: string | null) {
