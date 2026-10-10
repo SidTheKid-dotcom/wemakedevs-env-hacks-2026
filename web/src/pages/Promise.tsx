@@ -31,6 +31,26 @@ export default function PromisePage() {
   );
 }
 
+/** Shrinks the big number only when "18,758 kg" would not fit the card, so 3 digits and 7 digits both sit on one line. */
+function useFitWidth(ref: React.RefObject<HTMLElement | null>) {
+  useLayoutEffect(() => {
+    const el = ref.current, host = el?.closest(".card") as HTMLElement | null;
+    if (!el || !host) return;
+    const fit = () => {
+      el.style.fontSize = ""; // back to the stylesheet size, then measure
+      const avail = host.clientWidth, w = el.scrollWidth;
+      // 0.84 leaves room for the green highlight and the ink burst, which reach past the digits
+      if (w > avail * 0.84) el.style.fontSize = `${(parseFloat(getComputedStyle(el).fontSize) * avail * 0.84) / w}px`;
+    };
+    fit();
+    const late = setTimeout(fit, 650); // after the count-up reaches its widest value
+    const ro = new ResizeObserver(fit);
+    ro.observe(host);
+    document.fonts?.ready.then(fit);
+    return () => { clearTimeout(late); ro.disconnect(); };
+  }, [ref]);
+}
+
 /** Counts 0 → n over 500 ms (tabular figures, so the width does not jump). */
 function CountUp({ n, play }: { n: number; play: boolean }) {
   const [v, setV] = useState(play ? 0 : n);
@@ -64,6 +84,8 @@ function Card({ p }: { p: Project }) {
   const review = p.status === "review";
   useLang();
   const play = useRef(!reducedMotion() && !sessionStorage.getItem(`seen:${p.id}`)).current;
+  const bigRef = useRef<HTMLSpanElement>(null);
+  useFitWidth(bigRef);
   useEffect(() => { try { sessionStorage.setItem(`seen:${p.id}`, "1"); } catch { /* private mode */ } }, [p.id]);
   const [sheet, setSheet] = useState<"letter" | "share" | "peek" | null>(null);
   const m = method(p.owc_quote);
@@ -80,7 +102,7 @@ function Card({ p }: { p: Project }) {
         <p className="sub city-line">{t2("{city}, ward {w}", { city: t(cityName(p.city)), w: p.ward })}</p>
         <a className="number" id="num" href={pdfUrl(p)} target="_blank" rel="noreferrer"
           aria-label={`${kg(p.wet_kg_day)} kilograms of wet waste a day, ${review ? "as read by machine" : "promised in writing"}. Opens the PDF page.`}>
-          <span className={`big${review ? " pencil" : ""}`}>
+          <span ref={bigRef} className={`big${review ? " pencil" : ""}`}>
             {!review && <span className="num-hl" aria-hidden="true" />}
             <CountUp n={Math.round(p.wet_kg_day || 0)} play={play} /> kg{review && <sup className="q">?</sup>}
           </span>

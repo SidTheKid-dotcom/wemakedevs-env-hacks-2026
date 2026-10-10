@@ -83,8 +83,10 @@ p { margin: 0; }
 }
 /* under 360 px the keys cannot share the wordmark's line, so they lead the next row */
 @media (max-width: 359px) {
-  .nav .langs { position: static; order: -2; margin: 4px 0 2px; }
-  .nav::before { content: ""; order: -1; flex-basis: 100%; height: 0; } /* line break after the keys */
+  /* the keys and the search key share row 2, the links take row 3 */
+  .nav .langs { position: static; order: -3; margin: 4px 0 2px; }
+  .nav .btn.round { order: -2; }
+  .nav::before { content: ""; order: -1; flex-basis: 100%; height: 0; } /* line break before the links */
 }
 @media (min-width: 1024px) { .wordmark b { font-size: 48px; } .wordmark i { font-size: 40px; } }
 @media (min-width: 1024px) and (max-width: 1199px) { .nav .langs { top: 9px; } } /* centre the keys on the larger wordmark */
