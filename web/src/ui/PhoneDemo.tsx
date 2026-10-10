@@ -1,10 +1,11 @@
 // Home hero: a phone that plays the product on live data (search, results, promise, letter, officer list).
 // Every number comes from projects.json; the scenes only animate what the real screens show.
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { Summary } from "../api";
 import { builderName, kg, km, localities, method, placeName } from "../format";
 import { inkCircle } from "../map/PuneMap";
-import { InkPath } from "./Ink";
+import { arrow } from "../rough";
+import { InkPath, Stamp } from "./Ink";
 import { reducedMotion } from "../motion";
 
 const PLACE = { title: "Seasons Mall, Hadapsar", lat: 18.5199, lon: 73.9313 }; // Amazon Location's point for this address
@@ -13,8 +14,8 @@ const WARD = "52";
 const SCENES = [
   { label: "Type your area", ms: 4400 },
   { label: "See promises near you", ms: 3200 },
-  { label: "Open the promise and its page", ms: 4200 },
-  { label: "Ask for the plant to run", ms: 6000 },
+  { label: "Open the promise and its page", ms: 4600 },
+  { label: "Ask for the plant to run", ms: 6800 },
   { label: "Officers print a check-first list", ms: 5200 },
 ];
 
@@ -82,24 +83,39 @@ function Mast({ children }: { children?: ReactNode }) {
   return <div className="d-mast"><b>VACHAN</b><i lang="mr">वचन</i>{children}</div>;
 }
 
+const KEYS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+const TYPE_AT = 0.9, TYPE_FOR = 1.3; // when the address starts typing, and for how long (s)
+
+/** The phone keyboard: slides up on the tap, each key lights as its letter types, slides away on the suggestion. */
+function Keyboard() {
+  const text = PLACE.title.toLowerCase();
+  const flashes = (k: string) => [...text].flatMap((c, n) => (c === k ? [TYPE_AT + (n * TYPE_FOR) / text.length] : []))
+    .map((t) => <i key={t} className="d-flash" style={d(t)} />);
+  return (
+    <div className="d-kbd">
+      {KEYS.map((row) => <div key={row} className="d-krow">{[...row].map((k) => <span key={k} className="d-key">{k}{flashes(k)}</span>)}</div>)}
+      <div className="d-krow"><span className="d-key space">{flashes(" ")}</span></div>
+    </div>
+  );
+}
+
 function SearchScene() {
   return (
     <div className="d-pad">
       <Mast />
-      <div className="d-body">
-        <p className="d-h1">Did your builder promise to process your society's wet waste?</p>
-        <div className="d-input">
-          <span className="d-typed" style={{ "--n": PLACE.title.length, ...d(0.9) } as CSSProperties}>{PLACE.title}</span>
-          <span className="d-caret" />
-          <Tap at={0.4} />
-        </div>
-        <div className="d-btn">Find the promise</div>
-        <div className="d-suggest d-in" style={d(2.5)}>
-          <svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 22s7-7.2 7-12.5A7 7 0 0 0 5 9.5C5 14.8 12 22 12 22z" fill="var(--leaf)" /><circle cx="12" cy="9.5" r="2.6" fill="var(--label)" /></svg>
-          {PLACE.title}, Pune
-          <Tap at={3.4} />
-        </div>
+      <p className="d-h1">Did your builder promise to process your society's wet waste?</p>
+      <div className="d-input">
+        <span className="d-typed" style={{ "--n": PLACE.title.length, "--t": `${TYPE_FOR}s`, ...d(TYPE_AT) } as CSSProperties}>{PLACE.title}</span>
+        <span className="d-caret" />
+        <Tap at={0.4} />
       </div>
+      <div className="d-btn">Find the promise</div>
+      <div className="d-suggest d-in" style={d(2.5)}>
+        <svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 22s7-7.2 7-12.5A7 7 0 0 0 5 9.5C5 14.8 12 22 12 22z" fill="var(--leaf)" /><circle cx="12" cy="9.5" r="2.6" fill="var(--label)" /></svg>
+        {PLACE.title}, Pune
+        <Tap at={3.4} />
+      </div>
+      <Keyboard />
     </div>
   );
 }
@@ -142,22 +158,40 @@ function ResultsScene({ count, row, near }: { count: number; row: { p: Summary; 
 }
 
 function CardScene({ p }: { p: Summary }) {
+  const pad = useRef<HTMLDivElement>(null), num = useRef<HTMLParagraphElement>(null), clip = useRef<HTMLDivElement>(null);
+  const [ink, setInk] = useState<{ w: number; h: number; body: string; head: string } | null>(null);
+  useLayoutEffect(() => { // layout offsets, not screen boxes: the phone is rotated
+    const measure = () => {
+      const n = num.current!, c = clip.current!;
+      const from: [number, number] = [c.offsetLeft + c.offsetWidth - 26, c.offsetTop - 4];
+      const to: [number, number] = [n.offsetLeft + n.offsetWidth - 14, n.offsetTop + n.offsetHeight + 2];
+      setInk({ w: pad.current!.offsetWidth, h: pad.current!.offsetHeight, ...arrow(from, to, 22) });
+    };
+    measure();
+    document.fonts?.ready.then(measure);
+  }, []);
   return (
-    <div className="d-pad">
+    <div className="d-pad" ref={pad}>
       <Mast />
-      <div className="d-body spread">
-        <p className="d-place">{placeName(p)}</p>
-        <div>
-          <p className="d-big"><span className="d-hl" style={d(0.5)} />{kg(p.wet_kg_day)} kg</p>
-          <p className="d-sub">of wet waste a day</p>
-        </div>
-        <p className="d-method">{/biogas/i.test(p.quote || "") ? "Processed" : "Composted"} on site: {short(method(p.quote))}</p>
-        <div className="d-clip d-in" style={d(0.9)}>
-          <span className="d-sub">Page {p.page}</span>
-          <span className="d-quote"><span className="d-hl" style={d(1.4)} />{p.quote}</span>
-        </div>
+      <p className="d-place">{placeName(p)}</p>
+      <p className="d-big" ref={num}><span className="d-hl" style={d(0.5)} />{kg(p.wet_kg_day)} kg</p>
+      <p className="d-sub">of wet waste a day</p>
+      <p className="d-method">{/biogas/i.test(p.quote || "") ? "Processed" : "Composted"} on site: {short(method(p.quote))}</p>
+      <div className="d-clip d-in" style={d(0.9)} ref={clip}>
+        <span className="d-sub">Page {p.page}</span>
+        <span className="d-quote"><span className="d-hl" style={d(1.4)} />{p.quote}</span>
       </div>
-      <div className="d-btn">Ask for the plant to run<Tap at={3.4} /></div>
+      {ink && <svg className="d-arrow" viewBox={`0 0 ${ink.w} ${ink.h}`}>
+        <InkPath d={ink.body} color="var(--leaf)" width={2.2} delay={1800} dur={450} />
+        <InkPath d={ink.head} color="var(--leaf)" width={2.2} delay={2250} dur={150} />
+      </svg>}
+      <div className="d-pot">
+        <img className="pot" src="/props/pot.webp" alt="" />
+        <img className="sd now" src="/props/seedling-2.webp" alt="" />
+        <img className="sd next" src="/props/seedling-3.webp" alt="" />
+        {["banana", "eggshell", "onion"].map((n, k) => <img key={n} className="d-peel" src={`/props/${n}.webp`} alt="" style={{ "--x": `${(k - 1) * 16}%`, ...d(2.0 + k * 0.28) } as CSSProperties} />)}
+      </div>
+      <div className="d-btn d-cta">Ask for the plant to run<Tap at={3.8} /></div>
     </div>
   );
 }
@@ -176,11 +210,12 @@ function LetterScene({ p }: { p: Summary }) {
           <div className="d-btn">Write my letter<Tap at={1.5} /></div>
         </div>
         <div className="d-letter d-in" style={d(2.3)}>
-          <div className="d-paper">
+          <div className="d-paper sent">
             <p>To: {builder}</p>
             <p className="d-quote">“{p.quote}” (page {p.page})</p>
-            {[92, 80, 88, 70, 90, 76, 52].map((w, n) => <i key={n} className="d-line" style={{ width: `${w}%`, ...d(2.7 + n * 0.25) }} />)}
+            {[92, 80, 88, 70, 90, 76, 52].map((w, n) => <i key={n} className="d-line" style={{ width: `${w}%`, ...d(2.4 + n * 0.12) }} />)}
           </div>
+          <div className="d-bubble">“{p.quote}” (page {p.page})<span className="ticks">✓✓</span></div>
           <div className="d-btn">Send on WhatsApp<Tap at={4.9} /></div>
         </div>
       </div>
@@ -203,10 +238,7 @@ function OfficerScene({ rows }: { rows: Summary[] }) {
         ))}
       </div>
       <div className="d-btn">Print this list<Tap at={2.7} /></div>
-      <div className="d-print">
-        <p><b>Check first: PCMC ward {WARD}</b></p>
-        {rows.map((p, n) => <p key={p.id}>{n + 1}. {area(p)}, {kg(p.wet_kg_day)} kg, p. {p.page}</p>)}
-      </div>
+      <span className="d-stamp"><Stamp lines={["Printed"]} shape="box" rotate={-10} delay={3000} /></span>
     </div>
   );
 }

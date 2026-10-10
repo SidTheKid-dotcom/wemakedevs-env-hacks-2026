@@ -404,7 +404,7 @@
 .d-h2 { font: 800 22px/1.12 var(--display); }
 .d-sub { color: var(--ink-soft); font-size: 11px; }
 .d-input { position: relative; display: flex; align-items: center; min-height: 40px; padding: 0 10px; background: var(--label); box-shadow: inset 0 1px 0 #fff8, 0 1px 3px #0003; font-size: 13px; }
-.d-typed { display: inline-block; overflow: hidden; white-space: nowrap; width: 0; animation: dType 1.3s steps(var(--n)) var(--d) forwards; }
+.d-typed { display: inline-block; overflow: hidden; white-space: nowrap; width: 0; animation: dType var(--t, 1.3s) steps(var(--n)) var(--d) forwards; }
 @keyframes dType { to { width: calc(var(--n) * 1ch); } }
 .d-caret { width: 1.5px; height: 16px; background: var(--ink); animation: blink 1s steps(1) infinite; }
 .d-btn {
@@ -445,6 +445,7 @@
 .d-choose, .d-letter { position: absolute; inset: 16px 16px 20px; display: flex; flex-direction: column; gap: 10px; }
 .d-choose { justify-content: center; }
 .d-letter > .d-btn { margin-top: auto; }
+.d-cta { margin-top: auto; }
 .d-opt, .d-seg { align-self: stretch; }
 .d-seg { align-self: flex-start; }
 .d-opt { display: flex; align-items: center; min-height: 34px; padding: 0 10px; background: var(--label); box-shadow: 0 1px 2px #0003; font-size: 12px; }
@@ -459,9 +460,6 @@
 .d-led { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: baseline; padding: 11px 0; border-bottom: 1px solid #1d1c1a40; font-size: 14px; }
 .d-led .hand { font-size: 22px; }
 .d-led b { font: 800 18px var(--display); white-space: nowrap; }
-.d-print { position: absolute; z-index: 4; left: 14px; right: 14px; top: 46%; display: grid; gap: 6px; padding: 16px 14px 22px; background: #fff; font-size: 11.5px;
-  box-shadow: 0 -4px 18px #0004; transform: translateY(130%) rotate(-1deg); animation: dPrint 1.1s var(--ease-out) 3.2s forwards; }
-@keyframes dPrint { to { transform: translateY(0) rotate(-1.5deg); } }
 .demo-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; width: min(100%, 340px); }
 .demo-steps button { position: relative; display: flex; gap: 12px; align-items: center; width: 100%; min-height: 48px; padding: 6px 4px; overflow: hidden;
   border: 0; background: none; text-align: left; cursor: pointer; font: 16px/1.3 var(--type); color: var(--ink-soft); }
@@ -474,3 +472,33 @@
 @media (max-width: 359px) { .phone { width: 272px; height: 560px; } .d-h1 { font-size: 20px; } }
 @media (max-width: 359px) { .card .actions .btn { font-size: 16px; padding: 0 8px; } }
 @media (min-width: 1024px) and (max-width: 1279px) { .headline { font-size: 44px; } }
+
+/* scene 1: the keyboard slides up on the tap, keys light as the address types, it slides away on the suggestion */
+.d-kbd { position: absolute; z-index: 5; left: 0; right: 0; bottom: 0; display: grid; gap: 7px; padding: 10px 4px 24px; background: #d6cebd; box-shadow: 0 -2px 10px #0002;
+  transform: translateY(100%); animation: dUp .3s var(--ease-out) .45s forwards, dDown .3s ease-in 3.55s forwards; }
+@keyframes dUp { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes dDown { from { transform: none; } to { transform: translateY(100%); } }
+.d-krow { display: flex; justify-content: center; gap: 4px; }
+.d-key { position: relative; flex: 0 0 23px; height: 34px; display: grid; place-items: center; overflow: hidden; border-radius: 4px; background: var(--label); box-shadow: 0 1px 0 #0003; font-size: 13px; }
+.d-key.space { flex-basis: 140px; }
+.d-flash { position: absolute; inset: 0; background: var(--leaf-hi); opacity: 0; animation: dFlash .2s ease-out var(--d); }
+@keyframes dFlash { 30% { opacity: 1; } }
+/* scene 3: the ink arrow from the quote to the number, and the pot that fills */
+.d-arrow { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 3; }
+.d-pot { position: absolute; left: 50%; bottom: 78px; width: 104px; margin-left: -52px; aspect-ratio: 908 / 948; opacity: 0; animation: dIn .4s var(--ease-out) 1.4s forwards; }
+.d-pot img { position: absolute; }
+.d-pot .pot { inset: 0; width: 100%; }
+.d-pot .sd { left: 24.9%; top: 18.3%; width: 45%; }
+.d-pot .sd.now { animation: dOut .3s ease-in 3.1s forwards; }
+.d-pot .sd.next { opacity: 0; animation: dIn .3s ease-out 3.1s forwards; }
+.d-peel { left: calc(36% + var(--x)); top: 24%; width: 26%; opacity: 0; animation: dPeel .6s cubic-bezier(.5, 0, 1, 1) var(--d) forwards; }
+@keyframes dPeel { 0% { opacity: 1; transform: translateY(-260%) rotate(0); } 85% { opacity: 1; transform: translateY(0) rotate(160deg); } 100% { opacity: 0; transform: translateY(8%) rotate(180deg); } }
+/* scene 4: after Send, the paper steps back and the letter shows below it as a sent WhatsApp message */
+.d-paper.sent { transform-origin: 50% 0; animation: dSend .3s ease-out 5.05s forwards; }
+@keyframes dSend { to { opacity: .55; transform: scale(.96); } }
+.d-bubble { position: absolute; right: 0; bottom: 64px; max-width: 84%; padding: 8px 10px 5px; border-radius: 10px 10px 2px 10px; background: #d9fdd3; box-shadow: 0 1px 2px #0002;
+  font-size: 11.5px; font-weight: 700; opacity: 0; transform: scale(.6); transform-origin: right bottom; animation: dPop .3s var(--ease-out) 5.3s forwards; }
+.d-bubble .ticks { display: block; text-align: right; color: #34b7f1; font-weight: 400; }
+@keyframes dPop { to { opacity: 1; transform: none; } }
+/* scene 5: a stamp lands on the list after Print */
+.d-stamp { position: absolute; z-index: 5; right: 4px; bottom: 74px; transform: scale(.62); transform-origin: right bottom; pointer-events: none; }
