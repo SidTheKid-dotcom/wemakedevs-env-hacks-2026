@@ -12,6 +12,7 @@ import { ErrorState, Loading, Masthead } from "../ui/Parts";
 import { SearchTape } from "./Search";
 import { LetterSheet } from "./Letter";
 import { ShareSheet } from "./Share";
+import { PdfPeek } from "../ui/PdfPeek";
 
 export default function PromisePage() {
   const { id = "" } = useParams();
@@ -62,7 +63,7 @@ function Card({ p }: { p: Project }) {
   const review = p.status === "review";
   const play = useRef(!reducedMotion() && !sessionStorage.getItem(`seen:${p.id}`)).current;
   useEffect(() => { try { sessionStorage.setItem(`seen:${p.id}`, "1"); } catch { /* private mode */ } }, [p.id]);
-  const [sheet, setSheet] = useState<"letter" | "share" | null>(null);
+  const [sheet, setSheet] = useState<"letter" | "share" | "peek" | null>(null);
   const m = method(p.owc_quote);
   const found = p.checks.find((c) => c.name === "found_in_minutes")?.pass;
   const opPhase = p.checks.find((c) => c.name === "operation_phase")?.pass;
@@ -127,7 +128,7 @@ function Card({ p }: { p: Project }) {
               : p.decision === "recommended" && <Stamp lines={["Recommended", "for clearance", longDate(p.meeting_date)]} delay={1200 * t} play={play} />}
         </span>
         <div className="links">
-          <a className="ink hand" href={pdfUrl(p)} target="_blank" rel="noreferrer">{review ? "Open the page and check it yourself" : `Open page ${p.source.page}`}</a>
+          <button className="ink hand linkish" onClick={() => setSheet("peek")}>{review ? "Open the page and check it yourself" : `See it on page ${p.source.page}`}</button>
           <a className="ink hand" href={p.source.parivesh_url} target="_blank" rel="noreferrer">Original on PARIVESH</a>
         </div>
         <ul className="checks" aria-label="Checks">
@@ -158,6 +159,7 @@ function Card({ p }: { p: Project }) {
       {!review && <QuoteArrow play={play} />}
       {sheet === "letter" && <LetterSheet p={p} onClose={() => setSheet(null)} />}
       {sheet === "share" && <ShareSheet p={p} onClose={() => setSheet(null)} />}
+      {sheet === "peek" && <PdfPeek p={p} onClose={() => setSheet(null)} />}
     </article>
   );
 }

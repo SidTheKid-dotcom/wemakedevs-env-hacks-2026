@@ -44,6 +44,21 @@
 .about .ink { min-height: 0; }
 .fixit { margin-top: -4px; font-size: 14px; }
 .fixit .ink { min-height: 0; }
+
+/* the cited page, with the promise marked where it is printed */
+.peek { display: grid; gap: 10px; }
+.peek-page { position: relative; display: grid; justify-items: center; min-height: 160px; background: #fff; border: 1px solid #1d1c1a33; border-radius: 2px; overflow: hidden; }
+.peek-page canvas { display: block; max-width: 100%; height: auto; }
+.peek-hl {
+  position: absolute; pointer-events: none; border-radius: 2px;
+  background: color-mix(in srgb, var(--leaf-hi) 72%, transparent);
+  outline: 2px solid var(--leaf); mix-blend-mode: multiply;
+  animation: peekIn 420ms 120ms both ease-out;
+}
+@keyframes peekIn { from { opacity: 0; transform: scaleX(.6); transform-origin: left center; } }
+@media (prefers-reduced-motion: reduce) { .peek-hl { animation: none; } }
+.peek-msg { position: absolute; top: 50%; transform: translateY(-50%); }
+.peek-quote { font: 15px/1.5 var(--type); max-width: 60ch; }
 .card-right { position: relative; }
 .clip-wrap { position: relative; margin: 6px 0 0; }
 .clipping {

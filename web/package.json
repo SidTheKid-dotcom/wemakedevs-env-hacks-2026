@@ -9,6 +9,7 @@
     "map": "node scripts/build-map.mjs"
   },
   "dependencies": {
+    "pdfjs-dist": "^5.4.149",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.4"

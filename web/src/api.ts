@@ -18,6 +18,8 @@ export type Project = Summary & {
   proposal_id: string; title: string; owc_quote: string | null; tenements: number | null;
   solar_promised: boolean | null; energy_saving_pct: number | null; stp_kld: number | null;
   source: { parivesh_url: string; mirror_url: string; page: number; sha256: string };
+  /** Where the quoted line is printed, in PDF points. Added by the proof step, so only proved quotes have one. */
+  quote_bbox?: { page: number; x0: number; y0: number; x1: number; y1: number; pw: number; ph: number } | null;
   checks: Check[]; review_reason: string | null; related_proposal_ids: string[];
 };
 export type Stats = {
