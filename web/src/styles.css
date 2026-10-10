@@ -61,18 +61,33 @@ p { margin: 0; }
 .wordmark i { font: 700 24px/1 var(--deva); font-style: normal; padding-left: 12px; border-left: 1.5px solid var(--ink); }
 .wordmark svg { position: absolute; left: 0; bottom: -10px; width: 62%; height: 10px; overflow: visible; }
 .nav { display: flex; gap: 10px 18px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-/* phones: the links take a second row under the wordmark, so both always show */
-@media (max-width: 599px) {
+/* phones and tablets: two rows. The one-row desktop header only fits from 1200 px in Hindi. */
+@media (max-width: 1199px) {
   .masthead { flex-wrap: wrap; row-gap: 4px; }
-  .nav { order: 3; width: 100%; gap: 0 16px; flex-wrap: wrap; }
-  .nav .ink { min-height: 44px; font-size: 14px; }
-  .nav .btn.round { position: absolute; right: 0; top: 0; }
+  .wordmark { min-height: 42px; } /* row 1 is as tall as the language keys, so they never reach row 2 */
+  .nav { order: 3; width: 100%; gap: 0 10px; flex-wrap: wrap; justify-content: flex-start; }
+  .nav .ink { min-height: 44px; font-size: clamp(12px, 3.33vw, 14px); }
+  /* the typewriter face is wide; tighten Latin labels only, Devanagari must keep its spacing */
+  .nav .ink .roll:not(.whole) { letter-spacing: -0.03em; }
   .masthead { position: relative; }
-  /* the language keys sit on the wordmark's line, at the right */
-  .nav .langs { position: absolute; right: 0; top: 0; margin-inline-start: 0; }
-  .nav .btn.round + .langs, .nav .btn.round ~ .langs { right: 52px; }
+  /* row 1: wordmark left, language keys right. Row 2: the links, then search at the end.
+     Three things on row 1 cannot fit a phone, so search moves down. */
+  .nav .langs { position: absolute; right: 0; top: var(--keys-top, 0px); margin-inline-start: 0; }
+  .nav .btn.round { order: 9; margin-left: auto; width: 38px; height: 38px; min-height: 38px; }
+  .nav .btn.round svg { width: 19px; height: 19px; }
+}
+/* the narrowest phones: a slightly smaller wordmark so the keys still fit beside it */
+@media (max-width: 389px) {
+  .wordmark b { font-size: 24px; } .wordmark i { font-size: 21px; padding-left: 9px; } .wordmark { gap: 9px; }
+  .langs button { padding: 0 6px; font-size: 13px; }
+}
+/* under 360 px the keys cannot share the wordmark's line, so they lead the next row */
+@media (max-width: 359px) {
+  .nav .langs { position: static; order: -2; margin: 4px 0 2px; }
+  .nav::before { content: ""; order: -1; flex-basis: 100%; height: 0; } /* line break after the keys */
 }
 @media (min-width: 1024px) { .wordmark b { font-size: 48px; } .wordmark i { font-size: 40px; } }
+@media (min-width: 1024px) and (max-width: 1199px) { .nav .langs { top: 9px; } } /* centre the keys on the larger wordmark */
 
 /* ---------- ink links: hand-drawn underline that redraws on hover ---------- */
 .ink { color: var(--leaf); text-decoration: none; position: relative; display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
