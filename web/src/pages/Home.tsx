@@ -64,6 +64,7 @@ export default function Home() {
             <button className="ink hand linkish" onClick={() => example(e)}>{e.label}</button>{i < EXAMPLES.length - 2 ? ", " : i === EXAMPLES.length - 2 ? " or " : ""}
           </span>)}</p>
           <p className="away">Not from Pune? <Link className="ink hand" to={`/p/${EXAMPLE_ID}`}>See a real promise</Link></p>
+          {s?.quotes_verified != null && <p className="label proof hero-proof">{s.quotes_verified} of {s.quotes_checked} quotes re-checked against the government PDF.</p>}
         </div>
         <div className="hero-demo"><PhoneDemo projects={projects.data} /></div>
       </section>
@@ -77,7 +78,6 @@ export default function Home() {
         <div className="atlas-text">
           <h2>Every dot is a written promise</h2>
           <p>{s ? `${s.projects} housing project sites` : "Housing project sites"} in Pune (PMC) and Pimpri-Chinchwad (PCMC). A bigger dot means more wet waste promised. A hollow dot means a person must check it.</p>
-          {s?.quotes_verified != null && <p className="label proof">{s.quotes_verified} of {s.quotes_checked} quotes re-checked against the live government PDF after the last run, {shortDate(s.published_at.slice(0, 10))}.</p>}
           <Link className="ink hand" to="/how">How we find and check each promise</Link>
         </div>
         <div className="atlas-map">
@@ -113,8 +113,8 @@ function Chain({ s }: { s?: Stats }) {
         </li>
         <li className="link">
           <span className="hand cue">The solution</span>
-          <p className="say">The builder already promised to fix it.</p>
-          <p>To get environmental clearance, each large project promised in writing to process its wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.</p>
+          <p className="say">Who is keeping the promise?</p>
+          <p>To get environmental clearance, {s ? `${s.owc_projects} of the ${s.counted_projects} Pune projects` : "each large project"} promised in writing to process their wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.</p>
         </li>
         <li className="link">
           <span className="hand cue">How</span>

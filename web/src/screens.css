@@ -158,6 +158,8 @@
 @container (max-width: 479px) { .search-cta { flex: 1 1 100%; } }
 .away { font-size: 16px; }
 .away .ink { min-height: 0; }
+/* the proof sits tight under the hero links: trust beside the button, not another line to read */
+.hero-proof { margin-top: -10px; font-size: 14px; padding: 4px 9px; }
 .kicker { font: 400 19px/1.3 var(--hand); color: var(--ink-soft); }
 .pick-one { font-size: 18px; color: var(--ink-soft); margin-top: 4px; }
 .map { position: relative; }

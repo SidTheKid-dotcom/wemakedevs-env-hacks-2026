@@ -34,7 +34,7 @@ export function ShareSheet({ p, onClose }: { p: Project; onClose: () => void }) 
           <span className="sub">{placeName(p)}</span>
         </div>
         <button className="btn wide" onClick={copy}>{copied ? "Link copied" : "Copy link"}</button>
-        <a className="btn ghost wide" href={`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`} target="_blank" rel="noreferrer">WhatsApp</a>
+        <a className="btn ghost wide" href={`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`} target="_blank" rel="noreferrer">Send on WhatsApp</a>
         <p className="note">The link opens this page with the PDF page.</p>
         <p className="sr-only" aria-live="polite">{copied ? "Link copied" : ""}</p>
       </div>

@@ -54,7 +54,7 @@ export function LetterSheet({ p, onClose }: { p: Project; onClose: () => void })
   return (
     <Dialog label="Ask for the plant to run" onClose={onClose}>
       {step === "choose" && <div className="letter-step">
-        <h2>Who should get this letter?</h2>
+        <h2>Who should we ask?</h2>
         <div role="radiogroup" aria-label="Recipient" className="tags">
           {builder && <label className={`tag${to === "builder" ? " on" : ""}`}>
             <input type="radio" name="to" checked={to === "builder"} onChange={() => setTo("builder")} /> {builder}, the builder
