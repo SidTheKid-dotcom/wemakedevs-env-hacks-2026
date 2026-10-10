@@ -7,7 +7,7 @@ import { Dialog } from "../ui/Parts";
 
 export function ShareSheet({ p, onClose }: { p: Project; onClose: () => void }) {
   const url = `${location.origin}/p/${p.id}`;
-  const text = `${placeName(p)}: ${kg(p.wet_kg_day)} kg of wet waste a day, promised in writing to be processed on site. See the page:`;
+  const text = `Is our wet-waste plant running? The builder of ${placeName(p)} promised in writing to process ${kg(p.wet_kg_day)} kg of wet waste a day on site. Here is the page:`;
   const [copied, setCopied] = useState(false);
   const [native] = useState(() => matchMedia("(pointer: coarse)").matches && "share" in navigator);
 
@@ -23,9 +23,9 @@ export function ShareSheet({ p, onClose }: { p: Project; onClose: () => void }) 
     setTimeout(() => setCopied(false), 1600);
   };
   return (
-    <Dialog label="Share this promise" onClose={onClose}>
+    <Dialog label="Send to my society group" onClose={onClose}>
       <div className="letter-step share">
-        <h2>Share this promise</h2>
+        <h2>Send to my society group</h2>
         <div className="mini-card" aria-hidden="true">
           <Washi style={{ left: "38%", top: -12 }} seed={2} />
           <b className="wm">VACHAN</b>

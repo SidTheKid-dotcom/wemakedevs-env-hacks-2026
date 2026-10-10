@@ -52,7 +52,7 @@ export function LetterSheet({ p, onClose }: { p: Project; onClose: () => void })
   const cardUrl = `${location.origin}/p/${p.id}`;
 
   return (
-    <Dialog label="Draft letter" onClose={onClose}>
+    <Dialog label="Ask for the plant to run" onClose={onClose}>
       {step === "choose" && <div className="letter-step">
         <h2>Who should get this letter?</h2>
         <div role="radiogroup" aria-label="Recipient" className="tags">
@@ -67,7 +67,7 @@ export function LetterSheet({ p, onClose }: { p: Project; onClose: () => void })
           <button role="radio" aria-checked={lang === "en"} className={lang === "en" ? "on" : ""} onClick={() => setLang("en")}>English</button>
           <button role="radio" aria-checked={lang === "mr"} className={lang === "mr" ? "on" : ""} onClick={() => setLang("mr")} lang="mr">मराठी</button>
         </div>
-        <button className="btn wide" onClick={draft}>Draft letter →</button>
+        <button className="btn wide" onClick={draft}>Write my letter</button>
       </div>}
 
       {step === "drafting" && <div className="state" aria-live="polite"><Compost className="state-pot" /><p className="sub">Drafting from the minutes…</p></div>}

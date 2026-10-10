@@ -72,8 +72,9 @@ function Card({ p }: { p: Project }) {
   return (
     <article className={`card${review ? " review" : ""}`}>
       <div className="card-left">
+        {!review && <p className="kicker hand">What the builder promised in writing</p>}
         <h1 className="place">{placeName(p)}</h1>
-        <p className="sub">{cityName(p.city)}, ward {p.ward}</p>
+        <p className="sub city-line">{cityName(p.city)}, ward {p.ward}</p>
         <a className="number" id="num" href={pdfUrl(p)} target="_blank" rel="noreferrer"
           aria-label={`${kg(p.wet_kg_day)} kilograms of wet waste a day, ${review ? "as read by machine" : "promised in writing"}. Opens the PDF page.`}>
           <span className={`big${review ? " pencil" : ""}`}>
@@ -93,8 +94,12 @@ function Card({ p }: { p: Project }) {
         {p.city === "PCMC" && <p className="sub fines">PCMC notices set fines for large societies that don't process wet waste.</p>}
         <div className="actions">
           {review ? <a className="btn" href={pdfUrl(p)} target="_blank" rel="noreferrer">Open the page</a>
-            : <button className="btn" onClick={() => setSheet("letter")}>Draft letter</button>}
-          <button className="btn ghost" onClick={() => setSheet("share")}>Share</button>
+            : <button className="btn" onClick={() => setSheet("letter")}>Ask for the plant to run</button>}
+          <button className="btn ghost share-btn" onClick={() => setSheet("share")} aria-label="Send to my society group">
+            <span className="lbl">Send to my society group</span>
+            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="18" cy="5" r="2.6" fill="none" stroke="currentColor" strokeWidth="2" /><circle cx="6" cy="12" r="2.6" fill="none" stroke="currentColor" strokeWidth="2" /><circle cx="18" cy="19" r="2.6" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3" stroke="currentColor" strokeWidth="2" /></svg>
+          </button>
+          {!review && <p className="cta-note sub">A free letter to the builder or ward office, in English or <span lang="mr">मराठी</span>. No sign-in.</p>}
         </div>
       </div>
 
@@ -141,6 +146,7 @@ function Card({ p }: { p: Project }) {
         <div><dt>Proposal:</dt><dd className="label">{p.proposal_id.replace("SIA/MH/", "")}</dd></div>
         {builder && <Link className="ink" to={`/b/${builderSlug(builder)}`}>Other projects by {builder}</Link>}
       </dl>
+      <p className="about sub">VACHAN reads Pune's public environmental-clearance minutes and shows what each builder promised to do with wet waste. A promise is not proof that a plant was built or runs. <Link className="ink" to="/">Search another building</Link></p>
 
       {!review && <QuoteArrow play={play} />}
       {sheet === "letter" && <LetterSheet p={p} onClose={() => setSheet(null)} />}

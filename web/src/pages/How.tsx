@@ -16,13 +16,24 @@ const STEPS = [
   { id: "check", t: "Check every quote against the PDF", s: "plain code", icon: "M3 5h18v14H3z M9 9l-3 3 3 3 M15 9l3 3-3 3 M13 8l-2 8" },
   { id: "see", t: "You see the page", s: "CloudFront, Amplify", icon: "M3 4h18v16H3z M3 8h18 M6 6h.5 M8 6h.5 M10 6h.5 M6 12h8 M6 15h12" },
 ];
+const SIMPLE = [
+  { t: "What goes in", b: "Public government minutes", s: "Over a thousand PDFs in which builders promised how they would handle wet waste.", icon: "M6 3h9l4 4v14H6z M9 10h7 M9 13h7 M9 16h5" },
+  { t: "What VACHAN does", b: "Finds each promise and checks it", s: "Reads every page, pulls out each project's wet-waste promise, and checks the number word for word against the PDF.", icon: "M5 3h11v18H5z M8 8h6 M8 11h6 M8 14h3 M17 14a3 3 0 1 1-.1 0 M19.2 16.2L22 19" },
+  { t: "What comes out", b: "A promise card and a letter", s: "The kg a day, how it is processed, the exact page, and a letter asking for the plant to run.", icon: "M4 6h16v12H4z M4 7l8 6 8-6" },
+];
+const CHAIN = [
+  { k: "Problem", t: "Wet waste from large societies is trucked to city plants." },
+  { k: "Product", t: "VACHAN shows what the builder promised in writing, with the page." },
+  { k: "Action", t: "Residents ask for the plant to run. Officers know whom to check first." },
+  { k: "Solution", t: "The waste is processed where it is made." },
+];
 const TICKS = ["Found word for word in the minutes", "Operation phase, not construction", "Wet waste per flat in the usual range (0.5 to 3 kg)", "Recommended for clearance"];
 
 export default function How() {
   const { data: s } = useLoad(getStats, []);
   const strip = useRef<HTMLOListElement>(null);
   const [drawn, setDrawn] = useState(false);
-  useEffect(() => { document.title = "How VACHAN reads the minutes"; }, []);
+  useEffect(() => { document.title = "How VACHAN works"; }, []);
   useEffect(() => { // arrows draw in, one after the other, when the diagram comes into view
     const io = new IntersectionObserver(([e]) => e.isIntersecting && (setDrawn(true), io.disconnect()), { threshold: 0.3 });
     io.observe(strip.current!);
@@ -33,26 +44,28 @@ export default function How() {
     <Desk props="plain" pot={false}>
       <Masthead />
       <article className="how">
-        <h1>How VACHAN reads the minutes</h1>
-        <p className="label fresh">
-          Source: SEAC minutes on PARIVESH.{s && <> Newest meeting {longDate(s.newest_meeting_date)}. Published {new Date(s.published_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}.</>}
-        </p>
-        <ol className="flow" ref={strip}>
-          {STEPS.map((st, i) => (
-            <li key={st.id} id={st.id} className="flow-box">
+        <h1>How VACHAN works</h1>
+        <p className="how-lede">To get environmental clearance, each large housing project tells a state committee how it will handle its waste. The committee's meeting minutes are public, on a government website called PARIVESH. VACHAN reads them for you.</p>
+        <ol className="flow three">
+          {SIMPLE.map((st, i) => (
+            <li key={st.t} className="flow-box">
               <svg className="flow-frame" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 <InkPath d={roughLine([2, 2], [98, 3], i) + roughLine([98, 3], [97, 98], i + 1) + roughLine([97, 98], [3, 97], i + 2) + roughLine([3, 97], [2, 2], i + 3)} width={1.6} color="var(--leaf)" play={false} />
               </svg>
-              <b>{st.t}</b>
+              <span className="hand cue">{st.t}</span>
               <svg className="flow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d={st.icon} fill="none" stroke="var(--leaf)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              <span className="label">{st.s}</span>
-              {i < STEPS.length - 1 && <svg className="flow-arrow" viewBox="0 0 30 30" aria-hidden="true">
-                <InkPath d="M3 15 L25 15 M18 8 L26 15 L18 22" color="var(--leaf)" width={2.4} play={drawn} delay={i * 300} dur={300} />
-              </svg>}
+              <b>{st.b}</b>
+              <span className="sub">{st.s}</span>
+              {i < SIMPLE.length - 1 && <svg className="flow-arrow" viewBox="0 0 30 30" aria-hidden="true"><path d="M3 15 L25 15 M18 8 L26 15 L18 22" fill="none" stroke="var(--leaf)" strokeWidth="2.4" strokeLinecap="round" /></svg>}
             </li>
           ))}
         </ol>
-
+        <ol className="why-chain" aria-label="From the problem to the solution">
+          {CHAIN.map((c) => <li key={c.k}><span className="hand cue">{c.k}</span><span>{c.t}</span></li>)}
+        </ol>
+        <p className="label fresh">
+          Source: SEAC minutes on PARIVESH.{s && <> Newest meeting {longDate(s.newest_meeting_date)}. Published {new Date(s.published_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}.</>}
+        </p>
         <div className="how-cols">
           <section id="data">
             <h2>What the numbers are</h2>
@@ -80,6 +93,25 @@ export default function How() {
             </ul>
           </section>
         </div>
+        <details className="hood">
+          <summary><h2>Under the hood: the AWS pipeline</h2></summary>
+          <p className="sub">For the technically curious. Every night the pipeline reads new minutes and re-checks every quote.</p>
+        <ol className="flow" ref={strip}>
+            {STEPS.map((st, i) => (
+              <li key={st.id} id={st.id} className="flow-box">
+                <svg className="flow-frame" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                  <InkPath d={roughLine([2, 2], [98, 3], i) + roughLine([98, 3], [97, 98], i + 1) + roughLine([97, 98], [3, 97], i + 2) + roughLine([3, 97], [2, 2], i + 3)} width={1.6} color="var(--leaf)" play={false} />
+                </svg>
+                <b>{st.t}</b>
+                <svg className="flow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d={st.icon} fill="none" stroke="var(--leaf)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <span className="label">{st.s}</span>
+                {i < STEPS.length - 1 && <svg className="flow-arrow" viewBox="0 0 30 30" aria-hidden="true">
+                  <InkPath d="M3 15 L25 15 M18 8 L26 15 L18 22" color="var(--leaf)" width={2.4} play={drawn} delay={i * 300} dur={300} />
+                </svg>}
+              </li>
+            ))}
+          </ol>
+        </details>
       </article>
     </Desk>
   );

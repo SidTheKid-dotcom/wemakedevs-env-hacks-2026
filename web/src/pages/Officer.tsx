@@ -14,7 +14,7 @@ export default function Officer() {
   const wards = useMemo(() => [...new Set(pcmc.map((p) => p.ward))].sort((a, b) => +a - +b), [pcmc]);
   const [ward, setWard] = useState(() => { try { return localStorage.getItem("officer-ward") || "52"; } catch { return "52"; } });
   useEffect(() => { try { localStorage.setItem("officer-ward", ward); } catch { /* private mode */ } }, [ward]);
-  useEffect(() => { document.title = "Who to check first | VACHAN"; }, []);
+  useEffect(() => { document.title = "Which projects to check first | VACHAN"; }, []);
   const inWard = pcmc.filter((p) => p.ward === ward);
   const first = inWard.filter((p) => p.status === "auto" && p.decision === "recommended")
     .sort((a, b) => (b.wet_kg_day || 0) - (a.wet_kg_day || 0) || a.meeting_date.localeCompare(b.meeting_date));
@@ -27,20 +27,23 @@ export default function Officer() {
       {error ? <ErrorState title="The promise list did not load." detail="The data server did not answer. Try again in a minute." retry={retry} />
         : !data ? <Loading />
           : <div className="officer">
-            <div className="ward-pick">
-              <label className="label select" key={ward}>
-                <span className="sr-only">Ward</span>
-                <select value={ward} onChange={(e) => setWard(e.target.value)}>
-                  {wards.map((w) => <option key={w} value={w}>PCMC ward {w}{zone(w) ? `, zone ${zone(w)}` : ""}</option>)}
-                </select>
-              </label>
-              <span className="hand sub">older ward layout, DataMeet</span>
-              <button className="btn no-print print-btn" onClick={() => print()}>Print list</button>
-            </div>
+            <header className="officer-head">
+              <p className="kicker hand">For PCMC ward officers planning visits to large societies</p>
+              <h1>Ward {ward}: which projects to check first</h1>
+              <p className="sub">The biggest wet-waste promises in this ward, from their clearance minutes. Ranked by kg a day, then by age. A list to plan visits, not a verdict.</p>
+              <div className="ward-pick">
+                <label className="label select" key={ward}>
+                  <span className="sr-only">Ward</span>
+                  <select value={ward} onChange={(e) => setWard(e.target.value)}>
+                    {wards.map((w) => <option key={w} value={w}>PCMC ward {w}{zone(w) ? `, zone ${zone(w)}` : ""}</option>)}
+                  </select>
+                </label>
+                <button className="btn no-print print-btn" onClick={() => print()}>Print this list</button>
+              </div>
+            </header>
             <div className="officer-cols">
               <section>
-                <h1>Who to check first. <span className="hl-band">This is not a verdict.</span></h1>
-                <p className="sub">Ranked by wet waste promised, then by how long ago it was recommended.</p>
+                <h2 className="ledger-h">Check first: {first.length} {first.length === 1 ? "project" : "projects"}</h2>
                 {first.length === 0 ? <Empty title="No recommended projects found in this ward." /> : (
                   <table className="ledger" key={ward}>
                     <caption className="sr-only">Who to check first in PCMC ward {ward}</caption>
@@ -70,6 +73,7 @@ export default function Officer() {
                 ))}
               </aside>
             </div>
+            <p className="sub footnote">Ward boundaries: the older PCMC layout, from DataMeet. Each row links to its promise and its page in the minutes.</p>
           </div>}
     </Desk>
   );
