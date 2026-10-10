@@ -1,8 +1,8 @@
 // Masthead, dialog sheet, and the loading / empty / error states (SPEC 5.9, 6.5, 7.4).
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Compost } from "./Compost";
 import { Underline } from "./Ink";
+import { Reading } from "./Reading";
 import { LANGS, setLang, t, useLang } from "../i18n";
 
 /** Nav label whose letters roll up on hover. */
@@ -89,17 +89,13 @@ export function Dialog({ label, onClose, children }: { label: string; onClose: (
   );
 }
 
-/** Shows only after 200 ms, so fast loads never flash a skeleton. */
+/** Shows only after 200 ms, so fast loads never flash a loader. */
 export function Loading({ text = "" }: { text?: string }) {
   const [show, setShow] = useState(false);
   useEffect(() => { const t = setTimeout(() => setShow(true), 200); return () => clearTimeout(t); }, []);
   if (!show) return null;
   return (
-    <div className="state" aria-live="polite">
-      <div className="skeleton" aria-hidden="true"><i style={{ width: "60%" }} /><i /><i style={{ width: "80%" }} /></div>
-      <Compost className="state-pot" />
-      <p className="sub">{text || t("Reading the minutes…")}</p>
-    </div>
+    <div className="state"><Reading label={text || t("Reading the minutes…")} /></div>
   );
 }
 

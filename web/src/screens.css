@@ -566,3 +566,18 @@
 @keyframes dPop { to { opacity: 1; transform: none; } }
 /* scene 5: a stamp lands on the list after Print */
 .d-stamp { position: absolute; z-index: 5; right: 4px; bottom: 74px; transform: scale(.62); transform-origin: right bottom; pointer-events: none; }
+
+/* ---------- the loading mark: a highlighter reading a page ---------- */
+.reading { display: grid; justify-items: center; gap: 14px; }
+.reading svg { display: block; width: 160px; height: auto; overflow: visible; }
+.rd-sheet { fill: #fbf8ef; stroke: #1d1c1a33; stroke-width: 1.2; filter: drop-shadow(0 6px 8px #3b2a1626); }
+.rd-fold { fill: #e8e0cc; stroke: #1d1c1a33; stroke-width: 1.2; stroke-linejoin: round; }
+.rd-line { fill: #1d1c1a; opacity: .22; }
+.rd-hl { fill: var(--leaf-hi); transform-box: fill-box; transform-origin: left center; transform: scaleX(0);
+  animation: rd-sweep 2.8s var(--ease-out) infinite; animation-delay: calc(var(--i) * .3s); }
+.rd-hl.keep { animation-name: rd-keep; }
+/* each line: the highlighter runs across it, then lifts off */
+@keyframes rd-sweep { 0% { transform: scaleX(0); opacity: .95; } 11% { transform: scaleX(1); opacity: .95; } 20%, 100% { transform: scaleX(1); opacity: 0; } }
+/* the promise line: the mark stays until the page turns */
+@keyframes rd-keep { 0% { transform: scaleX(0); opacity: .95; } 11% { transform: scaleX(1); } 78% { transform: scaleX(1); opacity: .95; } 92%, 100% { transform: scaleX(1); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .rd-hl { animation: none; } .rd-hl.keep { transform: none; opacity: .95; } }

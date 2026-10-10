@@ -3,9 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { draftLetter, type Project } from "../api";
 import { builderName } from "../format";
 import { reducedMotion } from "../motion";
-import { Compost } from "../ui/Compost";
 import { Stamp } from "../ui/Ink";
 import { Dialog } from "../ui/Parts";
+import { Reading } from "../ui/Reading";
 import { t, useLang } from "../i18n";
 
 const FORBIDDEN = /violat|fail|illegal|missing|fraud/i; // guard: a letter must never accuse
@@ -74,7 +74,7 @@ export function LetterSheet({ p, onClose }: { p: Project; onClose: () => void })
         <button className="btn wide" onClick={draft}>{t("Write my letter")}</button>
       </div>}
 
-      {step === "drafting" && <div className="state" aria-live="polite"><Compost className="state-pot" /><p className="sub">{t("Drafting from the minutes…")}</p></div>}
+      {step === "drafting" && <div className="state"><Reading label={t("Drafting from the minutes…")} /></div>}
 
       {step === "letter" && <div className="letter-step">
         <h2>{t("Your letter")}</h2>
