@@ -8,13 +8,14 @@ from decimal import Decimal
 
 import boto3
 
-from vachan import checks
+from vachan import checks, ocr
 from vachan.extract import MODEL_ID, extract
 from vachan.geo import latlon, locate
 from vachan.split import page_at, split
 
 BUCKET = os.environ.get("BUCKET", "")
 TABLE = os.environ.get("TABLE", "")
+OCR_ENABLED = os.environ.get("OCR_ENABLED", "1") != "0"
 s3 = boto3.client("s3")
 
 
@@ -23,7 +24,15 @@ def pdf_text(sha: str) -> str:
     s3.download_file(BUCKET, f"pdf/{sha}.pdf", pdf)
     subprocess.run(["pdftotext", "-layout", pdf, txt], check=True, timeout=300)
     text = open(txt, errors="ignore").read()
+    pages = text.count("\f") + 1
     os.remove(pdf), os.remove(txt)
+    if OCR_ENABLED and ocr.looks_scanned(text, pages):
+        # A photographed meeting: poppler found nothing, so every project in it would be lost.
+        try:
+            text = ocr.read(BUCKET, f"pdf/{sha}.pdf")
+            print(f"ocr {sha} {len(text)} characters")
+        except Exception as e:  # OCR is a rescue, never a reason to fail the run
+            print("ocr failed", sha, repr(e)[:200])
     s3.put_object(Bucket=BUCKET, Key=f"text/{sha}.txt", Body=text.encode())
     return text
 

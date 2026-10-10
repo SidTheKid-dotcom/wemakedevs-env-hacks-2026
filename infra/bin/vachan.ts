@@ -12,6 +12,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
+import * as fs from "fs";
 import * as path from "path";
 
 const app = new cdk.App();
@@ -53,6 +54,10 @@ const crawl = step("Crawl", "vachan.crawl.handler", 15, 1024);
 const readPdf = step("Process", "vachan.process.handler", 15, 2048);
 const publish = step("Publish", "vachan.publish.handler", 5, 1024);
 const proof = step("Proof", "vachan.proof.handler", 15, 2048);
+readPdf.addToRolePolicy(new iam.PolicyStatement({ // a few minutes are photographs of paper
+  actions: ["textract:StartDocumentTextDetection", "textract:GetDocumentTextDetection"],
+  resources: ["*"], // Textract has no resource-level permissions for these calls
+}));
 readPdf.addToRolePolicy(new iam.PolicyStatement({
   actions: ["bedrock:InvokeModel"],
   resources: ["arn:aws:bedrock:*::foundation-model/*", `arn:aws:bedrock:*:${stack.account}:inference-profile/*`],
@@ -91,10 +96,10 @@ const guard = new bedrock.CfnGuardrail(stack, "LetterGuard", {
   blockedInputMessaging: "This request cannot be used to draft a letter.",
   blockedOutputsMessaging: "The draft could not be written safely.",
   description: "Keeps resident letters to 'promised in writing' and never an accusation.",
+  // The same list the prompt is tested against, so the two can never drift apart.
   wordPolicyConfig: {
-    wordsConfig: ["violated", "violation", "illegal", "fraud", "fraudulent", "criminal", "offence",
-      "failed to", "failure to", "non-compliance", "noncompliance", "guilty", "penalty notice",
-      "prosecute", "prosecution", "sue", "lawsuit", "legal action"].map((text) => ({ text })),
+    wordsConfig: (JSON.parse(fs.readFileSync(path.join(__dirname, "../../pipeline/vachan/blocked_words.json"), "utf8")) as string[])
+      .map((text) => ({ text })),
   },
   contentPolicyConfig: {
     filtersConfig: [

@@ -6,6 +6,7 @@ A daily cap keeps public use inside the budget.
 import json
 import os
 from datetime import date
+from pathlib import Path
 
 import boto3
 
@@ -13,6 +14,9 @@ BUCKET = os.environ.get("BUCKET", "")
 TABLE = os.environ.get("TABLE", "")
 MODEL_ID = os.environ.get("LETTER_MODEL_ID", "apac.amazon.nova-pro-v1:0")
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "300"))
+#: Words the Bedrock guardrail refuses, in and out. The CDK stack reads this same file,
+#: so the prompt and the guardrail can never disagree about them.
+BLOCKED_WORDS = json.loads((Path(__file__).parent / "blocked_words.json").read_text())
 GUARDRAIL_ID = os.environ.get("GUARDRAIL_ID", "")
 GUARDRAIL_VERSION = os.environ.get("GUARDRAIL_VERSION", "DRAFT")
 RECIPIENT = {
@@ -25,7 +29,7 @@ RULES = """Write a short, polite letter (under 220 words) from the residents of 
 Language: {lang}.
 Purpose: ask whether the on-site wet-waste processing promised in the environmental-clearance minutes is built and running, and ask for it to run, so the waste is processed at source.
 Use only these facts. Quote the evidence line exactly once. Cite the proposal number, meeting date and page.
-Say "promised in writing". Never say violated, failed, illegal or missing. Do not give legal advice. Leave [Name] and [Flat no.] blank for the residents.
+Say "promised in writing". Do not accuse anyone of wrongdoing, and do not mention penalties or court action: the minutes record a promise, not a verdict. Ask only whether the promised plant is built and running. Do not give legal advice. Leave [Name] and [Flat no.] blank for the residents.
 FACTS:
 {facts}"""
 s3 = boto3.client("s3")
