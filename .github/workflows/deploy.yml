@@ -1,0 +1,90 @@
+# Ships the site to Amplify after the tests pass. Only a push to main can do this.
+# AWS access is a one-hour OIDC token; there is no stored AWS key.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read # the deploy job adds id-token below, nothing else gets it
+
+concurrency:
+  group: deploy-main # one deploy at a time, and never cancel one half-way
+  cancel-in-progress: false
+
+jobs:
+  test:
+    # A direct push to main still cannot put a broken build on the live site.
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required to ask GitHub for the OIDC token
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Build the site
+        working-directory: web
+        env: # compiled into the bundle, so public once shipped; kept out of the logs
+          VITE_DATA_URL: ${{ secrets.VITE_DATA_URL }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_LOCATION_API_KEY: ${{ secrets.VITE_LOCATION_API_KEY }}
+        run: |
+          npm ci
+          npm run build
+          test -f dist/index.html || { echo "the build produced no index.html"; exit 1; }
+
+      - name: Zip the build
+        working-directory: web/dist
+        run: zip -qr ../site.zip .
+
+      - name: Get a one-hour AWS token
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v5.0.0
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gh-${{ github.run_id }}
+          aws-region: ap-south-1
+
+      - name: Deploy to Amplify
+        env:
+          APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
+        run: |
+          set -euo pipefail
+          # create-deployment hands back a pre-signed upload URL, so no S3 permission is needed
+          out=$(aws amplify create-deployment --app-id "$APP_ID" --branch-name main)
+          job=$(echo "$out" | jq -r .jobId)
+          url=$(echo "$out" | jq -r .zipUploadUrl)
+          echo "::add-mask::$url"
+          curl --fail --silent --show-error -H "Content-Type: application/zip" --upload-file web/site.zip "$url"
+          aws amplify start-deployment --app-id "$APP_ID" --branch-name main --job-id "$job" >/dev/null
+          echo "deploy job $job started"
+
+          for _ in $(seq 1 60); do
+            status=$(aws amplify get-job --app-id "$APP_ID" --branch-name main --job-id "$job" --query 'job.summary.status' --output text)
+            case "$status" in
+              SUCCEED) echo "deployed"; exit 0 ;;
+              FAILED|CANCELLED) echo "deploy finished as $status"; exit 1 ;;
+              *) sleep 5 ;;
+            esac
+          done
+          echo "deploy did not finish in five minutes"
+          exit 1
+
+      - name: Check the live site answers
+        run: |
+          set -euo pipefail
+          code=$(curl -s -o /dev/null -w '%{http_code}' --retry 3 --retry-delay 5 \
+            "https://main.${{ secrets.AMPLIFY_APP_ID }}.amplifyapp.com/")
+          test "$code" = "200" || { echo "the live site returned $code"; exit 1; }
+          echo "live site returned 200"

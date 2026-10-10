@@ -1,0 +1,56 @@
+# Tests for every push and every pull request. No AWS credentials are available to this workflow.
+name: CI
+
+on:
+  push:
+    branches-ignore: [main] # on main these run inside deploy.yml, so they are not run twice
+  pull_request:
+  workflow_call: # deploy.yml runs these before it ships anything
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pipeline:
+    name: Pipeline tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        with:
+          python-version: "3.12"
+      - run: pip install --disable-pip-version-check pytest boto3
+      - run: python -m pytest -q
+        working-directory: pipeline
+
+  web:
+    name: Web typecheck and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      - run: npm run build # tsc --noEmit && vite build
+        working-directory: web
+
+  contract:
+    name: Published data contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        with:
+          python-version: "3.12"
+      # The published JSON is public, so this job needs no credentials.
+      - run: python pipeline/tools/check_published.py
+        env:
+          DATA_URL: https://d18hjofgs77fd1.cloudfront.net
