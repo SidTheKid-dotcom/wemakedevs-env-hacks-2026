@@ -3,6 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProjects, placePosition, placesEnabled, suggestPlaces, type Place, type Summary } from "../api";
 import { kg, norm, placeName, title } from "../format";
+import { t, useLang } from "../i18n";
 
 type Option = { kind: "project"; p: Summary } | { kind: "place"; place: Place } | { kind: "query"; q: string };
 
@@ -32,6 +33,7 @@ export async function goToPlace(place: Place, nav: ReturnType<typeof useNavigate
 /** `cta` shows a worded button ("Find the promise") instead of the round search icon. */
 export function SearchTape({ autoFocus = false, value = "", cta }: { autoFocus?: boolean; value?: string; cta?: string }) {
   const nav = useNavigate();
+  useLang();
   const [q, setQ] = useState(value);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
@@ -75,7 +77,7 @@ export function SearchTape({ autoFocus = false, value = "", cta }: { autoFocus?:
     <form className={`search${cta ? " has-cta" : ""}`} role="search" onSubmit={(e) => { e.preventDefault(); if (options[0]) choose(options[active] || options[0]); }}>
       <div className="search-row">
         <input className="search-input" type="search" value={q} autoFocus={autoFocus} autoComplete="off" spellCheck={false}
-          placeholder="Area, project or builder" aria-label="Search by area, address, project, builder or village"
+          placeholder={t("Area, project or builder")} aria-label={t("Search by area, address, project, builder or village")}
           role="combobox" aria-expanded={open && options.length > 0} aria-controls={listId} aria-autocomplete="list"
           aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}
           onChange={(e) => { setQ(e.target.value); setOpen(true); setActive(-1); }} onKeyDown={key}

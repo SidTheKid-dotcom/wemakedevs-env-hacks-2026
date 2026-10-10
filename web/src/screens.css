@@ -182,6 +182,16 @@
 .hero-proof { margin-top: -10px; font-size: 14px; padding: 4px 9px; }
 .kicker { font: 400 19px/1.3 var(--hand); color: var(--ink-soft); }
 .pick-one { font-size: 18px; color: var(--ink-soft); margin-top: 4px; }
+/* language: three small stamps in the masthead, the chosen one inked in */
+.langs { display: inline-flex; gap: 2px; margin-inline-start: 4px; border: 1.5px solid #1d1c1a40; border-radius: 3px; padding: 2px; background: #1d1c1a0a; }
+.langs button {
+  min-height: 32px; padding: 0 9px; cursor: pointer; border: 0; border-radius: 2px;
+  background: none; color: var(--ink-soft); font: 400 15px/1 var(--type); white-space: nowrap;
+}
+.langs button:hover { color: var(--ink); background: #1d1c1a12; }
+.langs button.on { background: var(--leaf); color: #fff; }
+@media (max-width: 519px) { .langs button { padding: 0 7px; font-size: 14px; } }
+
 .map { position: relative; }
 /* zoom: paper keys on the desk, not a floating widget */
 .zoomer { position: absolute; top: 10px; right: 10px; display: grid; gap: 6px; justify-items: stretch; z-index: 3; }

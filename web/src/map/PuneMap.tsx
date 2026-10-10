@@ -7,6 +7,7 @@ import { easeInOut, onFrame, reducedMotion } from "../motion";
 import { rng, smoothPath } from "../rough";
 import { InkPath } from "../ui/Ink";
 import map from "./pune.json";
+import { t, useLang } from "../i18n";
 
 const { minLon, maxLat, kx, scale } = map.projection;
 export const project = (lat: number, lon: number): [number, number] => [(lon - minLon) * kx * scale, (maxLat - lat) * scale];
@@ -28,6 +29,7 @@ export function PuneMap({ points, focus, radiusKm = 2, highlight, label = "Map o
   points: Summary[]; focus?: { lat: number; lon: number } | null; radiusKm?: number; highlight?: string | null; label?: string;
 }) {
   const nav = useNavigate();
+  useLang();
   const box = useRef<HTMLDivElement>(null);
   const [vb, setVb] = useState(FULL);
   const [seen, setSeen] = useState(reducedMotion());
@@ -139,11 +141,11 @@ export function PuneMap({ points, focus, radiusKm = 2, highlight, label = "Map o
         </>}
       </svg>
       {!focus && <div className="zoomer no-print">
-        <button type="button" aria-label="Zoom in" onClick={() => zoom(1 / 1.6)}>+</button>
-        <button type="button" aria-label="Zoom out" onClick={() => zoom(1.6)} disabled={!zoomed}>−</button>
-        {zoomed && <button type="button" className="reset" onClick={() => setVb(FULL)}>Whole city</button>}
+        <button type="button" aria-label={t("Zoom in")} onClick={() => zoom(1 / 1.6)}>+</button>
+        <button type="button" aria-label={t("Zoom out")} onClick={() => zoom(1.6)} disabled={!zoomed}>−</button>
+        {zoomed && <button type="button" className="reset" onClick={() => setVb(FULL)}>{t("Whole city")}</button>}
       </div>}
-      {!focus && <p className="legend hand"><span className="lg-dot" /> bigger dot = more wet waste promised<br /><span className="lg-dot hollow" /> hollow = a person must check</p>}
+      {!focus && <p className="legend hand"><span className="lg-dot" /> {t("bigger dot = more wet waste promised")}<br /><span className="lg-dot hollow" /> {t("hollow = a person must check")}</p>}
       {tip && <Tip tip={tip} wards={wards} boxWidth={box.current?.clientWidth || 0} />}
     </div>
   );

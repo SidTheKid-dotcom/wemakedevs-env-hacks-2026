@@ -7,17 +7,18 @@ import { inkCircle } from "../map/PuneMap";
 import { arrow } from "../rough";
 import { InkPath, Stamp } from "./Ink";
 import { reducedMotion } from "../motion";
+import { t, useLang } from "../i18n";
 
 const PLACE = { title: "Seasons Mall, Hadapsar", lat: 18.5199, lon: 73.9313 }; // Amazon Location's point for this address
 const DEMO_ID = "sia-mh-mis-213829-2021"; // hand-checked: 1,056 kg a day, OWC, page 3, 540 m from Seasons Mall
 const WARD = "52";
 const SCENES = [
-  { label: "Type your area", ms: 4400 },
-  { label: "See promises near you", ms: 3200 },
-  { label: "Open the promise and its page", ms: 4600 },
-  { label: "Ask for the plant to run", ms: 6800 },
-  { label: "Officers print a check-first list", ms: 5200 },
-];
+  { en: "Type your area", ms: 4400 },
+  { en: "See promises near you", ms: 3200 },
+  { en: "Open the promise and its page", ms: 4600 },
+  { en: "Ask for the plant to run", ms: 6800 },
+  { en: "Officers print a check-first list", ms: 5200 },
+]; // labels are translated at render time, so switching language relabels the running demo
 
 const d = (s: number) => ({ "--d": `${s}s` }) as CSSProperties;
 function Tap({ at }: { at: number }) {
@@ -25,6 +26,7 @@ function Tap({ at }: { at: number }) {
 }
 
 export function PhoneDemo({ projects }: { projects?: Summary[] }) {
+  useLang();
   const [i, setI] = useState(0);
   const [visible, setVisible] = useState(true);
   const root = useRef<HTMLDivElement>(null);
@@ -64,17 +66,17 @@ export function PhoneDemo({ projects }: { projects?: Summary[] }) {
           {data && i === 4 && <OfficerScene rows={data.ward} />}
         </div>
       </div>
-      <ol className="demo-steps" aria-label="How to use VACHAN on your phone">
+      <ol className="demo-steps" aria-label={t("How to use VACHAN on your phone")}>
         {SCENES.map((s, n) => (
-          <li key={s.label} className={n === i ? "on" : ""}>
+          <li key={s.en} className={n === i ? "on" : ""}>
             <button onClick={() => setI(n)} disabled={n > last} aria-current={n === i ? "step" : undefined}>
-              <span className="d-n">{n + 1}</span><span className="d-l">{s.label}</span>
+              <span className="d-n">{n + 1}</span><span className="d-l">{t(s.en)}</span>
               {n === i && !reduced && <span className="d-bar" style={{ "--ms": `${s.ms}ms` } as CSSProperties} />}
             </button>
           </li>
         ))}
       </ol>
-      <p className="demo-note hand">Live data, not a mock-up.</p>
+      <p className="demo-note hand">{t("Live data, not a mock-up.")}</p>
     </div>
   );
 }
@@ -103,13 +105,13 @@ function SearchScene() {
   return (
     <div className="d-pad">
       <Mast />
-      <p className="d-h1">Did your builder promise to process your society's wet waste?</p>
+      <p className="d-h1">{t("Did your builder promise to process your society's wet waste?")}</p>
       <div className="d-input">
         <span className="d-typed" style={{ "--n": PLACE.title.length, "--t": `${TYPE_FOR}s`, ...d(TYPE_AT) } as CSSProperties}>{PLACE.title}</span>
         <span className="d-caret" />
         <Tap at={0.4} />
       </div>
-      <div className="d-btn">Find the promise</div>
+      <div className="d-btn">{t("Find the promise")}</div>
       <div className="d-suggest d-in" style={d(2.5)}>
         <svg viewBox="0 0 24 24" width="14" height="14"><path d="M12 22s7-7.2 7-12.5A7 7 0 0 0 5 9.5C5 14.8 12 22 12 22z" fill="var(--leaf)" /><circle cx="12" cy="9.5" r="2.6" fill="var(--label)" /></svg>
         {PLACE.title}, Pune
@@ -238,7 +240,7 @@ function OfficerScene({ rows }: { rows: Summary[] }) {
         ))}
       </div>
       <div className="d-btn">Print this list<Tap at={2.7} /></div>
-      <span className="d-stamp"><Stamp lines={["Printed"]} shape="box" rotate={-10} delay={3000} /></span>
+      <span className="d-stamp"><Stamp lines={[t("Printed")]} shape="box" rotate={-10} delay={3000} /></span>
     </div>
   );
 }

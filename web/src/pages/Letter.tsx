@@ -6,11 +6,13 @@ import { reducedMotion } from "../motion";
 import { Compost } from "../ui/Compost";
 import { Stamp } from "../ui/Ink";
 import { Dialog } from "../ui/Parts";
+import { t, useLang } from "../i18n";
 
 const FORBIDDEN = /violat|fail|illegal|missing|fraud/i; // guard: a letter must never accuse
 
 export function LetterSheet({ p, onClose }: { p: Project; onClose: () => void }) {
   const builder = builderName(p.builder);
+  useLang();
   const office = p.city === "PCMC" ? "pcmc" : "pmc";
   const saved = (() => { try { return JSON.parse(sessionStorage.getItem("letter") || "{}"); } catch { return {}; } })();
   const [to, setTo] = useState<"builder" | "pcmc" | "pmc">(builder ? saved.to === "builder" || !saved.to ? "builder" : office : office);
@@ -53,42 +55,42 @@ export function LetterSheet({ p, onClose }: { p: Project; onClose: () => void })
   const subject = `Wet-waste processing promised in writing: ${p.project_name || p.proposal_id}`;
 
   return (
-    <Dialog label="Ask for the plant to run" onClose={onClose}>
+    <Dialog label={t("Ask for the plant to run")} onClose={onClose}>
       {step === "choose" && <div className="letter-step">
-        <h2>Who should we ask?</h2>
+        <h2>{t("Who should we ask?")}</h2>
         <div role="radiogroup" aria-label="Recipient" className="tags">
           {builder && <label className={`tag${to === "builder" ? " on" : ""}`}>
-            <input type="radio" name="to" checked={to === "builder"} onChange={() => setTo("builder")} /> {builder}, the builder
+            <input type="radio" name="to" checked={to === "builder"} onChange={() => setTo("builder")} /> {builder}, {t("the builder")}
           </label>}
           <label className={`tag${to !== "builder" ? " on" : ""}`}>
-            <input type="radio" name="to" checked={to !== "builder"} onChange={() => setTo(office)} /> {p.city} ward office
+            <input type="radio" name="to" checked={to !== "builder"} onChange={() => setTo(office)} /> {p.city} {t("ward office")}
           </label>
         </div>
-        <div className="seg" role="radiogroup" aria-label="Language">
+        <div className="seg" role="radiogroup" aria-label={t("Language")}>
           <button role="radio" aria-checked={lang === "en"} className={lang === "en" ? "on" : ""} onClick={() => setLang("en")}>English</button>
           <button role="radio" aria-checked={lang === "mr"} className={lang === "mr" ? "on" : ""} onClick={() => setLang("mr")} lang="mr">मराठी</button>
           <button role="radio" aria-checked={lang === "hi"} className={lang === "hi" ? "on" : ""} onClick={() => setLang("hi")} lang="hi">हिंदी</button>
         </div>
-        <button className="btn wide" onClick={draft}>Write my letter</button>
+        <button className="btn wide" onClick={draft}>{t("Write my letter")}</button>
       </div>}
 
-      {step === "drafting" && <div className="state" aria-live="polite"><Compost className="state-pot" /><p className="sub">Drafting from the minutes…</p></div>}
+      {step === "drafting" && <div className="state" aria-live="polite"><Compost className="state-pot" /><p className="sub">{t("Drafting from the minutes…")}</p></div>}
 
       {step === "letter" && <div className="letter-step">
-        <h2>Your letter</h2>
+        <h2>{t("Your letter")}</h2>
         <div className="letterhead">
           {copied && <span className="copied"><Stamp lines={["Copied"]} shape="box" rotate={-10} /></span>}
           {typing
             ? <pre className="typed" aria-hidden="true">{text.slice(0, shown)}<span className="caret" /></pre>
-            : <textarea ref={area} className="typed" value={text} onChange={(e) => setText(e.target.value)} aria-label="Letter text, you can edit it" lang={lang} />}
-          {typing && <button className="ink hand" onClick={() => setShown(text.length)}>Show all</button>}
+            : <textarea ref={area} className="typed" value={text} onChange={(e) => setText(e.target.value)} aria-label={t("Letter text, you can edit it")} lang={lang} />}
+          {typing && <button className="ink hand" onClick={() => setShown(text.length)}>{t("Show all")}</button>}
         </div>
-        <p className="foot">Drafted by Amazon Bedrock from the minutes. <mark>Read it before you send.</mark></p>
+        <p className="foot">{t("Drafted by Amazon Bedrock from the minutes.")} <mark>{t("Read it before you send.")}</mark></p>
         <div className="actions">
-          <button className="btn" onClick={copy}>{copied ? "Copied" : "Copy letter"}</button>
-          <a className="btn ghost" href={`https://wa.me/?text=${encodeURIComponent(text + "\n\n" + cardUrl)}`} target="_blank" rel="noreferrer">Send on WhatsApp</a>
+          <button className="btn" onClick={copy}>{copied ? t("Copied") : t("Copy letter")}</button>
+          <a className="btn ghost" href={`https://wa.me/?text=${encodeURIComponent(text + "\n\n" + cardUrl)}`} target="_blank" rel="noreferrer">{t("Send on WhatsApp")}</a>
           {/* No recipient: no municipal address is published that we could verify, so the person adds their own. */}
-          <a className="btn ghost" href={`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text + "\n\n" + cardUrl)}`}>Send by email</a>
+          <a className="btn ghost" href={`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text + "\n\n" + cardUrl)}`}>{t("Send by email")}</a>
         </div>
         <p className="note">Email opens with the letter ready. Add your {to === "builder" ? "builder's" : `${p.city} ward office`} address in the To field.</p>
         <p className="sr-only" aria-live="polite">{copied ? "Letter copied" : !typing ? "Letter ready" : ""}</p>
@@ -96,9 +98,9 @@ export function LetterSheet({ p, onClose }: { p: Project; onClose: () => void })
 
       {step === "error" && <div className="state" role="alert">
         <img className="state-img" src="/props/paper-ball.webp" alt="" />
-        <h2>The letter could not be drafted.</h2>
-        <p className="sub">The promise and the page are still here.</p>
-        <button className="btn" onClick={draft}>Try again</button>
+        <h2>{t("The letter could not be drafted.")}</h2>
+        <p className="sub">{t("The promise and the page are still here.")}</p>
+        <button className="btn" onClick={draft}>{t("Try again")}</button>
       </div>}
     </Dialog>
   );

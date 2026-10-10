@@ -1,5 +1,6 @@
 // Formatting and small pure helpers shared by every screen.
 import type { City, Summary } from "./api";
+import { t } from "./i18n";
 
 const IN = new Intl.NumberFormat("en-IN");
 export const kg = (n: number | null | undefined) => (n == null ? "?" : IN.format(Math.round(n)));
@@ -42,12 +43,12 @@ export function method(quote: string | null | undefined) {
   const tail = quote.replace(/^.*?wet\s+(waste|garbage)\s*[:\-–]?\s*[\d,.]+\s*(kg\s*\/?\s*day)?/i, "").trim();
   const m = tail.match(/(organic\s+waste\s+conver\w*|owc|in[- ]?situ\s+compost\w*|vermi\s*-?\s*compost\w*|compost\w*|biogas|bio[- ]?methan\w*)/i);
   if (!m) return null;
-  const t = m[1].toLowerCase();
-  if (t === "owc" || t.startsWith("organic")) return "Organic waste converter (OWC)";
-  if (t.startsWith("in")) return "In-situ composting";
-  if (t.startsWith("vermi")) return "Vermicomposting";
-  if (t.startsWith("bio")) return "Biogas plant";
-  return "Composting on site";
+  const kind = m[1].toLowerCase();
+  if (kind === "owc" || kind.startsWith("organic")) return t("Organic waste converter (OWC)");
+  if (kind.startsWith("in")) return t("In-situ composting");
+  if (kind.startsWith("vermi")) return t("Vermicomposting");
+  if (kind.startsWith("bio")) return t("Biogas plant");
+  return t("Composting on site");
 }
 
 export const builderSlug = (b: string) => b.toLowerCase().replace(/m\/s\.?/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");

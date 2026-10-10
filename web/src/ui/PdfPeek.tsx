@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Project } from "../api";
 import { Dialog } from "./Parts";
+import { t, t2, useLang } from "../i18n";
 
 type Box = NonNullable<Project["quote_bbox"]>;
 
@@ -10,6 +11,7 @@ export function PdfPeek({ p, onClose }: { p: Project; onClose: () => void }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const wrap = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
+  useLang();
   const [hl, setHl] = useState<{ left: string; top: string; width: string; height: string } | null>(null);
   const box = p.quote_bbox as Box | null | undefined;
 
@@ -58,20 +60,20 @@ export function PdfPeek({ p, onClose }: { p: Project; onClose: () => void }) {
   }, [p.source.mirror_url, p.source.page, box]);
 
   return (
-    <Dialog label={`Page ${box?.page || p.source.page} of the minutes`} onClose={onClose}>
+    <Dialog label={t2("Page {p} of the minutes", { p: box?.page || p.source.page })} onClose={onClose}>
       <div className="peek">
-        <h2>Page {box?.page || p.source.page} of the minutes</h2>
-        <p className="sub">{box ? "The promise is highlighted where it is printed." : "The quoted line is on this page."}</p>
+        <h2>{t2("Page {p} of the minutes", { p: box?.page || p.source.page })}</h2>
+        <p className="sub">{box ? t("The promise is highlighted where it is printed.") : t("The quoted line is on this page.")}</p>
         <div className="peek-page" ref={wrap}>
           <canvas ref={canvas} aria-label={`Page ${box?.page || p.source.page}, with the quoted line highlighted`} />
           {state === "ready" && hl && <span className="peek-hl" style={hl} aria-hidden="true" />}
-          {state === "loading" && <p className="sub peek-msg">Opening the page…</p>}
-          {state === "error" && <p className="sub peek-msg">The page would not open here. Use the link below.</p>}
+          {state === "loading" && <p className="sub peek-msg">{t("Opening the page…")}</p>}
+          {state === "error" && <p className="sub peek-msg">{t("The page would not open here. Use the link below.")}</p>}
         </div>
         {p.owc_quote && <p className="peek-quote">“{p.owc_quote}”</p>}
         <div className="actions">
-          <a className="btn" href={`${p.source.mirror_url}#page=${box?.page || p.source.page}`} target="_blank" rel="noreferrer">Open the full PDF</a>
-          <a className="btn ghost" href={p.source.parivesh_url} target="_blank" rel="noreferrer">Original on PARIVESH</a>
+          <a className="btn" href={`${p.source.mirror_url}#page=${box?.page || p.source.page}`} target="_blank" rel="noreferrer">{t("Open the full PDF")}</a>
+          <a className="btn ghost" href={p.source.parivesh_url} target="_blank" rel="noreferrer">{t("Original on PARIVESH")}</a>
         </div>
       </div>
     </Dialog>

@@ -7,8 +7,10 @@ import { useLoad } from "../useLoad";
 import { Desk } from "../ui/Desk";
 import { Tick } from "../ui/Ink";
 import { Empty, ErrorState, Loading, Masthead } from "../ui/Parts";
+import { t, t2, useLang } from "../i18n";
 
 export default function Officer() {
+  useLang();
   const { data, error, retry } = useLoad(getProjects, []);
   const pcmc = useMemo(() => (data || []).filter((p) => p.city === "PCMC"), [data]);
   const wards = useMemo(() => [...new Set(pcmc.map((p) => p.ward))].sort((a, b) => +a - +b), [pcmc]);
@@ -25,13 +27,13 @@ export default function Officer() {
   return (
     <Desk props="plain">
       <Masthead />
-      {error ? <ErrorState title="The promise list did not load." detail="The data server did not answer. Try again in a minute." retry={retry} />
+      {error ? <ErrorState title={t("The promise list did not load.")} detail={t("The data server did not answer. Try again in a minute.")} retry={retry} />
         : !data ? <Loading />
           : <div className="officer">
             <header className="officer-head">
-              <p className="kicker hand">For PCMC ward officers planning visits to large societies</p>
-              <h1>Ward {ward}: which projects to check first</h1>
-              <p className="sub">Projects in this ward that promised to process the most wet waste on site, largest first. Use it to choose where to visit first. Being on this list does not mean anything is wrong.</p>
+              <p className="kicker hand">{t("For PCMC ward officers planning visits to large societies")}</p>
+              <h1>{t2("Ward {w}: which projects to check first", { w: ward })}</h1>
+              <p className="sub">{t("Projects in this ward that promised to process the most wet waste on site, largest first. Use it to choose where to visit first. Being on this list does not mean anything is wrong.")}</p>
               <div className="ward-pick">
                 <label className="label select" key={ward}>
                   <span className="sr-only">Ward</span>
@@ -39,16 +41,16 @@ export default function Officer() {
                     {wards.map((w) => <option key={w} value={w}>PCMC ward {w}{zone(w) ? `, zone ${zone(w)}` : ""}</option>)}
                   </select>
                 </label>
-                <button className="btn no-print print-btn" onClick={() => print()}>Print this list</button>
+                <button className="btn no-print print-btn" onClick={() => print()}>{t("Print this list")}</button>
               </div>
             </header>
             <div className="officer-cols">
               <section>
-                <h2 className="ledger-h">Check first: {first.length} {first.length === 1 ? "project" : "projects"}</h2>
-                {first.length === 0 ? <Empty title="No recommended projects found in this ward." /> : (
+                <h2 className="ledger-h">{t2(first.length === 1 ? "Check first: {n} project" : "Check first: {n} projects", { n: first.length })}</h2>
+                {first.length === 0 ? <Empty title={t("No recommended projects found in this ward.")} /> : (
                   <table className="ledger" key={ward}>
                     <caption className="sr-only">Who to check first in PCMC ward {ward}</caption>
-                    <thead><tr><th>#</th><th>Project</th><th>Wet waste a day</th><th>Promised</th><th>Recommended</th><th>Source</th></tr></thead>
+                    <thead><tr><th>#</th><th>{t("Project")}</th><th>{t("Wet waste a day")}</th><th>{t("Promised")}</th><th>{t("Recommended")}</th><th>{t("Source")}</th></tr></thead>
                     <tbody>
                       {first.map((p, i) => (
                         <tr key={p.id} className="fade-in" style={{ "--delay": `${i * 30}ms` } as CSSProperties}>
@@ -65,7 +67,7 @@ export default function Officer() {
                 )}
               </section>
               <aside className="review-queue">
-                <h2 className="hand">A person must check these: {review.length}</h2>
+                <h2 className="hand">{t2("A person must check these: {n}", { n: review.length })}</h2>
                 {review.map((p) => (
                   <Link key={p.id} to={`/p/${p.id}`} className="review-slip">
                     <Tick ok={false} play={false} />
@@ -74,7 +76,7 @@ export default function Officer() {
                 ))}
               </aside>
             </div>
-            <p className="sub footnote">Ward boundaries: the older PCMC layout, from DataMeet. Each row links to its promise and its page in the minutes.</p>
+            <p className="sub footnote">{t("Ward boundaries: the older PCMC layout, from DataMeet. Each row links to its promise and its page in the minutes.")}</p>
           </div>}
     </Desk>
   );

@@ -4,8 +4,10 @@ import type { Project } from "../api";
 import { kg, placeName } from "../format";
 import { Washi } from "../ui/Ink";
 import { Dialog } from "../ui/Parts";
+import { t, useLang } from "../i18n";
 
 export function ShareSheet({ p, onClose }: { p: Project; onClose: () => void }) {
+  useLang();
   const url = `${location.origin}/p/${p.id}`;
   const text = `Is our wet-waste plant running? The builder of ${placeName(p)} promised in writing to process ${kg(p.wet_kg_day)} kg of wet waste a day on site. Here is the page:`;
   const [copied, setCopied] = useState(false);
@@ -23,9 +25,9 @@ export function ShareSheet({ p, onClose }: { p: Project; onClose: () => void }) 
     setTimeout(() => setCopied(false), 1600);
   };
   return (
-    <Dialog label="Send to my society group" onClose={onClose}>
+    <Dialog label={t("Send to my society group")} onClose={onClose}>
       <div className="letter-step share">
-        <h2>Send to my society group</h2>
+        <h2>{t("Send to my society group")}</h2>
         <div className="mini-card" aria-hidden="true">
           <Washi style={{ left: "38%", top: -12 }} seed={2} />
           <b className="wm">VACHAN</b>
@@ -33,9 +35,9 @@ export function ShareSheet({ p, onClose }: { p: Project; onClose: () => void }) 
           <span>of wet waste a day</span>
           <span className="sub">{placeName(p)}</span>
         </div>
-        <button className="btn wide" onClick={copy}>{copied ? "Link copied" : "Copy link"}</button>
-        <a className="btn ghost wide" href={`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`} target="_blank" rel="noreferrer">Send on WhatsApp</a>
-        <p className="note">The link opens this page with the PDF page.</p>
+        <button className="btn wide" onClick={copy}>{copied ? t("Link copied") : t("Copy link")}</button>
+        <a className="btn ghost wide" href={`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`} target="_blank" rel="noreferrer">{t("Send on WhatsApp")}</a>
+        <p className="note">{t("The link opens this page with the PDF page.")}</p>
         <p className="sr-only" aria-live="polite">{copied ? "Link copied" : ""}</p>
       </div>
     </Dialog>

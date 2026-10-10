@@ -9,6 +9,7 @@ import { Desk } from "../ui/Desk";
 import { PhoneDemo } from "../ui/PhoneDemo";
 import { Empty, ErrorState, Masthead } from "../ui/Parts";
 import { goToPlace, matchProjects, SearchTape } from "./Search";
+import { t, t2, useLang } from "../i18n";
 
 const EXAMPLES: { label: string; q?: string; place?: string }[] = [
   { label: "Punawale", q: "Punawale" }, { label: "Hadapsar", q: "Hadapsar" }, { label: "Seasons Mall", place: "Seasons Mall, Hadapsar, Pune" },
@@ -28,6 +29,7 @@ export default function Home() {
   const [params] = useSearchParams();
   const nav = useNavigate();
   const { hash } = useLocation();
+  useLang();
   const stats = useLoad(getStats, []);
   const projects = useLoad(getProjects, []);
   const near = params.get("near")?.split(",").map(Number);
@@ -53,18 +55,18 @@ export default function Home() {
       <Masthead />
       <section className="hero">
         <div className="hero-text">
-          <p className="tagline">Read the fine print before you pay the fine.</p>
-          <h1 className="headline">Did your builder promise to process your society's wet waste?</h1>
+          <p className="tagline">{t("Read the fine print before you pay the fine.")}</p>
+          <h1 className="headline">{t("Did your builder promise to process your society's wet waste?")}</h1>
           <p className="lede">
-            {s ? `${s.owc_projects} of the ${s.counted_projects} Pune projects recommended for clearance did, in writing.` : "Pune's large housing projects did, in writing."}{" "}
-            Find the promise and its page. Then ask for the plant to run.
+            {s ? t2("{owc} of the {total} Pune projects recommended for clearance did, in writing.", { owc: s.owc_projects, total: s.counted_projects }) : t("Pune's large housing projects did, in writing.")}{" "}
+            {t("Find the promise and its page. Then ask for the plant to run.")}
           </p>
-          <div id="search"><SearchTape cta="Find the promise" value={q || params.get("label") || ""} /></div>
-          <p className="hand try">try {EXAMPLES.map((e, i) => <span key={e.label}>
-            <button className="ink hand linkish" onClick={() => example(e)}>{e.label}</button>{i < EXAMPLES.length - 2 ? ", " : i === EXAMPLES.length - 2 ? " or " : ""}
+          <div id="search"><SearchTape cta={t("Find the promise")} value={q || params.get("label") || ""} /></div>
+          <p className="hand try">{t("try")} {EXAMPLES.map((e, i) => <span key={e.label}>
+            <button className="ink hand linkish" onClick={() => example(e)}>{e.label}</button>{i < EXAMPLES.length - 2 ? ", " : i === EXAMPLES.length - 2 ? ` ${t("or")} ` : ""}
           </span>)}</p>
-          <p className="away">Not from Pune? <Link className="ink hand" to={`/p/${EXAMPLE_ID}`}>See a real promise</Link></p>
-          {s?.quotes_verified != null && <p className="label proof hero-proof">{s.quotes_verified} of {s.quotes_checked} quotes re-checked against the government PDF.</p>}
+          <p className="away">{t("Not from Pune?")} <Link className="ink hand" to={`/p/${EXAMPLE_ID}`}>{t("See a real promise")}</Link></p>
+          {s?.quotes_verified != null && s.quotes_checked != null && <p className="label proof hero-proof">{t2("{v} of {c} quotes re-checked against the government PDF.", { v: s.quotes_verified, c: s.quotes_checked })}</p>}
         </div>
         <div className="hero-demo"><PhoneDemo projects={projects.data} /></div>
       </section>
@@ -76,24 +78,24 @@ export default function Home() {
 
       <section className="atlas">
         <div className="atlas-text">
-          <h2>Every dot is a written promise</h2>
-          <p>{s ? `${s.projects} housing project sites` : "Housing project sites"} in Pune (PMC) and Pimpri-Chinchwad (PCMC). A bigger dot means more wet waste promised. A hollow dot means a person must check it.</p>
-          <Link className="ink hand" to="/how">How we find and check each promise</Link>
+          <h2>{t("Every dot is a written promise")}</h2>
+          <p>{s ? t2("{n} housing project sites in Pune (PMC) and Pimpri-Chinchwad (PCMC). A bigger dot means more wet waste promised. A hollow dot means a person must check it.", { n: s.projects }) : t("Housing project sites in Pune (PMC) and Pimpri-Chinchwad (PCMC). A bigger dot means more wet waste promised. A hollow dot means a person must check it.")}</p>
+          <Link className="ink hand" to="/how">{t("How we find and check each promise")}</Link>
         </div>
         <div className="atlas-map">
           {projects.data ? <PuneMap points={projects.data} focus={null} />
-            : projects.error ? <ErrorState title="The map did not load." detail="Search still works." retry={projects.retry} />
+            : projects.error ? <ErrorState title={t("The map did not load.")} detail={t("Search still works.")} retry={projects.retry} />
               : <div className="map skeleton-map" aria-hidden="true" />}
         </div>
       </section>
 
       <section className="closing">
-        <h2>Is your society's plant running?</h2>
-        <p className="lede">Find what your builder promised in writing, and the page it is on.</p>
-        <SearchTape cta="Find the promise" />
+        <h2>{t("Is your society's plant running?")}</h2>
+        <p className="lede">{t("Find what your builder promised in writing, and the page it is on.")}</p>
+        <SearchTape cta={t("Find the promise")} />
       </section>
       <footer className="foot-note sub">
-        Source: SEAC minutes on PARIVESH{s && `, newest meeting ${shortDate(s.newest_meeting_date)}`}. A promise is not proof that a plant was built or runs. <Link className="ink hand" to="/how">How it works</Link>
+        Source: SEAC minutes on PARIVESH{s && `, newest meeting ${shortDate(s.newest_meeting_date)}`}. {t("A promise is not proof that a plant was built or runs.")} <Link className="ink hand" to="/how">{t("How it works")}</Link>
       </footer>
     </Desk>
   );
@@ -103,36 +105,36 @@ export default function Home() {
 function Chain({ s }: { s?: Stats }) {
   return (
     <section className="chain" aria-labelledby="chain-h">
-      <h2 id="chain-h" className="sr-only">From the problem to the impact</h2>
+      <h2 id="chain-h" className="sr-only">{t("From the problem to the impact")}</h2>
       <ol>
         <li className="link problem">
-          <span className="hand cue">The problem</span>
+          <span className="hand cue">{t("The problem")}</span>
           <p className="fig">300 t</p>
           <p>of wet waste a day goes from Pune's housing societies and malls to city plants, says <a className="ink hand" href={PMC_SOURCE} target="_blank" rel="noreferrer">PMC</a>.</p>
           <p className="sub">In Pimpri-Chinchwad, <a className="ink hand" href={PCMC_SOURCE} target="_blank" rel="noreferrer">notices</a> set fines for large societies that don't process their own.</p>
         </li>
         <li className="link">
-          <span className="hand cue">The solution</span>
-          <p className="say">Who is keeping the promise?</p>
-          <p>To get environmental clearance, {s ? `${s.owc_projects} of the ${s.counted_projects} Pune projects` : "each large project"} promised in writing to process their wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.</p>
+          <span className="hand cue">{t("The solution")}</span>
+          <p className="say">{t("Who is keeping the promise?")}</p>
+          <p>{s ? t2("To get environmental clearance, {owc} of the {total} Pune projects promised in writing to process their wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.", { owc: s.owc_projects, total: s.counted_projects }) : t("To get environmental clearance, each large project promised in writing to process its wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.")}</p>
         </li>
         <li className="link">
-          <span className="hand cue">How</span>
+          <span className="hand cue">{t("How")}</span>
           <ol className="mini-steps">
-            <li>Search your area</li>
-            <li>See the promise and its page</li>
-            <li>Ask for the plant to run</li>
+            <li>{t("Search your area")}</li>
+            <li>{t("See the promise and its page")}</li>
+            <li>{t("Ask for the plant to run")}</li>
           </ol>
         </li>
         <li className="link">
-          <span className="hand cue">The outcome</span>
-          <p className="say">A letter that quotes the builder's own promise.</p>
-          <p>It goes to the builder or the ward office, with the page. Ward officers get a list of whom to check first.</p>
+          <span className="hand cue">{t("The outcome")}</span>
+          <p className="say">{t("A letter that quotes the builder's own promise.")}</p>
+          <p>{t("It goes to the builder or the ward office, with the page. Ward officers get a list of whom to check first.")}</p>
         </li>
         <li className="link impact">
-          <span className="hand cue">The impact</span>
+          <span className="hand cue">{t("The impact")}</span>
           <p className="fig">{s ? `${tonnes(s.wet_kg_day_total)} t` : "…"}</p>
-          <p>of wet waste a day, promised in writing to be processed on site across Pune. Every plant that runs keeps that waste where it is made, instead of on trucks to the city's dumping grounds and waste plants.</p>
+          <p>{t("of wet waste a day, promised in writing to be processed on site across Pune. Every plant that runs keeps that waste where it is made, instead of on trucks to the city's dumping grounds and waste plants.")}</p>
         </li>
       </ol>
     </section>
@@ -144,24 +146,24 @@ function Paths() {
   return (
     <section className="paths" aria-label="Who VACHAN is for">
       <div className="path">
-        <h2>For residents and flat buyers</h2>
-        <p className="sub">Your society got a wet-waste notice, or you are about to buy a flat.</p>
+        <h2>{t("For residents and flat buyers")}</h2>
+        <p className="sub">{t("Your society got a wet-waste notice, or you are about to buy a flat.")}</p>
         <ul className="ticks-list">
-          <li>See what your builder promised in writing, and the page</li>
-          <li>Send a letter asking for the plant to run</li>
-          <li>Share it with your society group</li>
+          <li>{t("See what your builder promised in writing, and the page")}</li>
+          <li>{t("Send a letter asking for the plant to run")}</li>
+          <li>{t("Share it with your society group")}</li>
         </ul>
-        <button className="btn" onClick={focusSearch}>Find your building's promise</button>
+        <button className="btn" onClick={focusSearch}>{t("Find your building's promise")}</button>
       </div>
       <div className="path officer-path">
-        <h2>For ward officers</h2>
-        <p className="sub">PCMC is surveying about 1,155 large waste generators. Where do you start?</p>
+        <h2>{t("For ward officers")}</h2>
+        <p className="sub">{t("PCMC is surveying about 1,155 large waste generators. Where do you start?")}</p>
         <ul className="ticks-list">
-          <li>A list for your ward, biggest written promises first</li>
-          <li>Each row links to its page in the minutes</li>
-          <li>Print it for field visits.</li>
+          <li>{t("A list for your ward, biggest written promises first")}</li>
+          <li>{t("Each row links to its page in the minutes")}</li>
+          <li>{t("Print it for field visits.")}</li>
         </ul>
-        <Link className="btn ghost" to="/officer">Open the ward list</Link>
+        <Link className="btn ghost" to="/officer">{t("Open the ward list")}</Link>
       </div>
     </section>
   );
@@ -182,10 +184,10 @@ function Results({ all, focus, q, label, radius, setRadius }: {
       <div className="results-list">
         <h2>{heading}</h2>
         {focus && label && <p className="sub">around {label}</p>}
-        {rows.length > 0 && <p className="hand pick-one">Open one to see the page and ask for the plant to run.</p>}
+        {rows.length > 0 && <p className="hand pick-one">{t("Open one to see the page and ask for the plant to run.")}</p>}
         {rows.length === 0 ? (focus
           ? <Empty title={`No written promises within ${radius} km of this address.`}>{radius < 5 && <button className="btn" onClick={() => setRadius(5)}>Search 5 km</button>}</Empty>
-          : <Empty title="No projects match this search." />)
+          : <Empty title={t("No projects match this search.")} />)
           : <ul className="rows">
             {rows.slice(0, 40).map(({ p, d }, i) => (
               <li key={p.id} className="fade-in" style={{ "--delay": `${Math.min(i, 12) * 40}ms` } as React.CSSProperties}
