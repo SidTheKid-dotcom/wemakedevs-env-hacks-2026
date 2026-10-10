@@ -70,32 +70,85 @@ export function PuneMap({ points, focus, radiusKm = 2, highlight, label = "Map o
     const nw = Math.min(FULL[2], Math.max(FULL[2] / 10, w)), nh = nw * (FULL[3] / FULL[2]);
     return [Math.min(FULL[2] - nw, Math.max(0, x)), Math.min(FULL[3] - nh, Math.max(0, y)), nw, nh];
   };
-  const zoom = (k: number) => setVb(([x, y, w, h]) => {
+  /** Scale the view by k, keeping the map point under screen point (sx, sy) where it is. Centre by default. */
+  const zoomAt = (k: number, sx?: number, sy?: number) => setVb(([x, y, w, h]) => {
+    const r = box.current?.querySelector("svg")?.getBoundingClientRect();
+    const fx = r && sx != null ? (sx - r.left) / r.width : 0.5, fy = r && sy != null ? (sy - r.top) / r.height : 0.5;
     const nw = w * k, nh = h * k;
-    return clampVb([x + (w - nw) / 2, y + (h - nh) / 2, nw, nh]);
+    return clampVb([x + (w - nw) * fx, y + (h - nh) * fy, nw, nh]);
   });
+  const zoom = (k: number) => zoomAt(k);
   const zoomed = vb[2] < FULL[2] - 1;
-  const pan = useRef<{ x: number; y: number; vb: number[]; moved: boolean } | null>(null);
+
+  // Pointers: a mouse drags the zoomed map, but only once it really moves, so a click on a dot
+  // or ward still lands on it. On a touch screen one finger always scrolls the page; two fingers
+  // pinch and move the map, as on any phone map.
+  const ptrs = useRef(new Map<number, { x: number; y: number }>());
+  const drag = useRef<{ x: number; y: number; vb: number[]; moved: boolean } | null>(null);
+  const pinch = useRef<{ d: number; mx: number; my: number; vb: number[] } | null>(null);
+  const dragged = useRef(false);
+  const svgRect = () => box.current?.querySelector("svg")?.getBoundingClientRect();
+  const pinchStart = () => {
+    const [a, b] = [...ptrs.current.values()];
+    pinch.current = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2, vb };
+  };
   const onDown = (e: React.PointerEvent<SVGSVGElement>) => {
-    if (!zoomed) return;
-    pan.current = { x: e.clientX, y: e.clientY, vb, moved: false };
-    e.currentTarget.setPointerCapture(e.pointerId);
+    ptrs.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (e.pointerType === "touch") {
+      if (ptrs.current.size === 2) { pinchStart(); setTip(null); }
+      return;
+    }
+    if (zoomed && e.button === 0) drag.current = { x: e.clientX, y: e.clientY, vb, moved: false };
   };
   const onMove = (e: React.PointerEvent<SVGSVGElement>) => {
-    const p = pan.current;
-    if (!p) return;
-    const scale = p.vb[2] / (box.current?.clientWidth || 1);
-    const dx = (e.clientX - p.x) * scale, dy = (e.clientY - p.y) * scale;
-    if (Math.abs(dx) + Math.abs(dy) > 2 * scale) p.moved = true;
-    setVb(clampVb([p.vb[0] - dx, p.vb[1] - dy, p.vb[2], p.vb[3]]));
+    if (!ptrs.current.has(e.pointerId)) return;
+    ptrs.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const r = svgRect();
+    if (!r) return;
+    const pz = pinch.current;
+    if (pz && ptrs.current.size === 2) {
+      const [a, b] = [...ptrs.current.values()];
+      const d = Math.hypot(a.x - b.x, a.y - b.y) || 1, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      const k = pz.d / d, nw = pz.vb[2] * k, nh = pz.vb[3] * k;
+      // the map point that sat under the fingers' first midpoint stays under their current midpoint
+      const ax = pz.vb[0] + ((pz.mx - r.left) / r.width) * pz.vb[2], ay = pz.vb[1] + ((pz.my - r.top) / r.height) * pz.vb[3];
+      setVb(clampVb([ax - ((mx - r.left) / r.width) * nw, ay - ((my - r.top) / r.height) * nh, nw, nh]));
+      return;
+    }
+    const dg = drag.current;
+    if (!dg) return;
+    if (!dg.moved && Math.hypot(e.clientX - dg.x, e.clientY - dg.y) < 4) return; // still a click
+    if (!dg.moved) { dg.moved = true; e.currentTarget.setPointerCapture(e.pointerId); setTip(null); }
+    const s = dg.vb[2] / r.width;
+    setVb(clampVb([dg.vb[0] - (e.clientX - dg.x) * s, dg.vb[1] - (e.clientY - dg.y) * s, dg.vb[2], dg.vb[3]]));
   };
-  const onUp = () => { if (pan.current?.moved) setTip(null); pan.current = null; };
+  const onUp = (e: React.PointerEvent<SVGSVGElement>) => {
+    ptrs.current.delete(e.pointerId);
+    if (ptrs.current.size < 2) pinch.current = null;
+    if (drag.current?.moved) dragged.current = true; // swallow the click that ends a drag
+    drag.current = null;
+  };
+
+  // A trackpad pinch arrives as ctrl + wheel. Zoom the map there instead of the whole page.
+  useEffect(() => {
+    const el = box.current?.querySelector("svg");
+    if (!el || focus) return;
+    const onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey) return; // a plain wheel scrolls the page
+      e.preventDefault();
+      zoomAt(Math.exp(e.deltaY * 0.01), e.clientX, e.clientY);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focus]);
 
   return (
     <div className="map" ref={box}>
       <svg viewBox={vb.join(" ")} role="img" aria-label={label} preserveAspectRatio="xMidYMid meet"
         className={zoomed ? "zoomed" : undefined}
         onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
+        onClickCapture={(e) => { if (dragged.current) { dragged.current = false; e.stopPropagation(); e.preventDefault(); } }}
         onClick={(e) => { if (e.target === e.currentTarget) setTip(null); }}>
         <defs>
           <filter id="riso"><feTurbulence baseFrequency="0.8" numOctaves="2" seed="2" /><feColorMatrix values="0 0 0 0 0.12  0 0 0 0 0.35  0 0 0 0 0.24  0 0 0 0.09 0" /><feComposite in2="SourceGraphic" operator="in" /></filter>
@@ -145,6 +198,7 @@ export function PuneMap({ points, focus, radiusKm = 2, highlight, label = "Map o
         <button type="button" aria-label={t("Zoom out")} onClick={() => zoom(1.6)} disabled={!zoomed}>−</button>
         {zoomed && <button type="button" className="reset" onClick={() => setVb(FULL)}>{t("Whole city")}</button>}
       </div>}
+      {!focus && zoomed && <p className="map-hint hand no-print">{t(touch ? "Two fingers move the map." : "Drag to move the map.")}</p>}
       {!focus && <p className="legend hand"><span className="lg-dot" /> {t("bigger dot = more wet waste promised")}<br /><span className="lg-dot hollow" /> {t("hollow = a person must check")}</p>}
       {tip && <Tip tip={tip} wards={wards} boxWidth={box.current?.clientWidth || 0} />}
     </div>
