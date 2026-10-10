@@ -1,17 +1,17 @@
 // Home scroll story (SPEC 6.4): from a page nobody reads to waste processed at source.
 // A sticky stage; every actor is a pure function of scroll progress p, so scrolling back reverses it.
 import { useEffect, useRef, type CSSProperties } from "react";
-import { kg } from "../format";
+import { kg, tonnes } from "../format";
 import { clamp, mix, onFrame, reducedMotion, span } from "../motion";
 import { SearchTape } from "./Search";
 
 const QUOTE = "Wet waste: 922.61 In-situ Composting";
 const BEATS = [
-  { from: 0.0, to: 0.15, text: "Every large housing project in Pune made a promise." },
+  { from: 0.0, to: 0.15, text: "Large housing projects in Pune made a written promise." },
   { from: 0.15, to: 0.35, text: "It is written in public minutes. Over a thousand of them. Nobody reads them." },
   { from: 0.35, to: 0.55, text: "VACHAN reads every one and pulls out the waste promise." },
   { from: 0.55, to: 0.8, text: "923 kg of wet waste a day, promised to be composted on site, not trucked to Moshi or Hadapsar." },
-  { from: 0.8, to: 1.01, text: "Find the promise for your building." },
+  { from: 0.8, to: 1.01, text: "Find the promise for your building. Then ask for the plant to run." },
 ];
 const PEELS = ["banana", "eggshell", "tea", "onion"];
 
@@ -128,8 +128,8 @@ export function Story({ total }: { total?: number }) {
           <span className="hand">✓ Composted on site<br />✓ Recommended for clearance</span>
         </div>
         <div className="s-search">
-          {total != null && <p className="hand">{kg(total)} kg a day across Pune, promised in writing.</p>}
-          <SearchTape />
+          {total != null && <p className="hand">{tonnes(total)} tonnes of wet waste a day across Pune, promised in writing.</p>}
+          <SearchTape cta="Find the promise" />
         </div>
       </div>
       <span id="story-end" />

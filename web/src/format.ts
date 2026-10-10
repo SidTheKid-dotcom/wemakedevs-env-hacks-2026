@@ -3,6 +3,8 @@ import type { City, Summary } from "./api";
 
 const IN = new Intl.NumberFormat("en-IN");
 export const kg = (n: number | null | undefined) => (n == null ? "?" : IN.format(Math.round(n)));
+/** City totals in tonnes ("735.6"): "7,35,579 kg" reads wrong outside India. */
+export const tonnes = (kgPerDay: number) => (kgPerDay / 1000).toFixed(1);
 export const longDate = (iso: string) =>
   new Date(iso + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 export const shortDate = (iso: string) =>

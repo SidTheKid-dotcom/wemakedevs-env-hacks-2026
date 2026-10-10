@@ -1,26 +1,29 @@
-// Home (SPEC 5.2): what VACHAN is in one sentence, the Pune total, search, the map, the scroll story.
+// Home: what VACHAN is and what to do, in one screen; then problem to impact, who it is for, the map, the story.
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { getProjects, getStats, suggestPlaces, type Summary } from "../api";
-import { kg, km, method, placeName, shortDate, title } from "../format";
+import { getProjects, getStats, suggestPlaces, type Stats, type Summary } from "../api";
+import { kg, km, method, placeName, shortDate, title, tonnes } from "../format";
 import { PuneMap } from "../map/PuneMap";
 import { useLoad } from "../useLoad";
 import { Desk } from "../ui/Desk";
-import { InkPath } from "../ui/Ink";
+import { PhoneDemo } from "../ui/PhoneDemo";
 import { Empty, ErrorState, Masthead } from "../ui/Parts";
-import { roughLine } from "../rough";
 import { goToPlace, matchProjects, SearchTape } from "./Search";
 import { Story } from "./Story";
 
 const EXAMPLES: { label: string; q?: string; place?: string }[] = [
   { label: "Punawale", q: "Punawale" }, { label: "Hadapsar", q: "Hadapsar" }, { label: "Seasons Mall", place: "Seasons Mall, Hadapsar, Pune" },
 ];
-const STEPS = [
-  { t: "Fetched every night", to: "/how#fetch", icon: "M6 4h9l4 4v12H6z M9 10h7 M9 13h7 M9 16h5" },
-  { t: "Read by Amazon Bedrock", to: "/how#read", icon: "M5 4h14v16H5z M8 8h8 M8 11h8 M8 14h5" },
-  { t: "Every quote checked against the government PDF", to: "/how#check", icon: "M5 4h11v16H5z M8 8h5 M8 11h5 M17 14a3 3 0 1 1-.1 0 M19 17l3 3" },
-  { t: "You act", to: "/how#data", icon: "M4 20h16 M7 20V9h6v11 M15 20v-6h3v6 M9 12h2 M9 15h2" },
-];
+const EXAMPLE_ID = "sia-mh-mis-277145-2022";
+const PMC_SOURCE = "https://www.thebridgechronicle.com/pune/punes-wet-waste-crisis-deepens-as-processing-capacity-falls-short-agn97";
+const PCMC_SOURCE = "https://www.punekarnews.in/pcmcs-major-decision-wet-waste-from-large-housing-societies-will-not-be-collected-from-july-1/";
+
+/** Focus the hero search (used by "Find your building's promise" and the Residents link). */
+function focusSearch() {
+  const box = document.getElementById("search");
+  box?.scrollIntoView({ behavior: "smooth", block: "center" });
+  box?.querySelector("input")?.focus({ preventScroll: true });
+}
 
 export default function Home() {
   const [params] = useSearchParams();
@@ -33,58 +36,131 @@ export default function Home() {
   const q = params.get("q");
   const [radius, setRadius] = useState(2);
   useEffect(() => { setRadius(2); }, [params]);
-  useEffect(() => { document.title = "VACHAN: read the fine print before you pay the fine"; }, []);
-  useEffect(() => { if (hash === "#near") document.getElementById("near")?.scrollIntoView({ behavior: "smooth", block: "start" }); }, [hash, params]);
+  useEffect(() => { document.title = "VACHAN: find your builder's written promise to process wet waste"; }, []);
+  useEffect(() => {
+    if (hash === "#near") document.getElementById("near")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (hash === "#search") focusSearch();
+  }, [hash, params]);
 
   const example = async (e: (typeof EXAMPLES)[number]) => {
     if (e.q) return nav(`/?q=${encodeURIComponent(e.q)}#near`);
     const [first] = await suggestPlaces(e.place!).catch(() => []);
     if (first) await goToPlace(first, nav);
   };
+  const s = stats.data;
 
   return (
     <Desk props="home">
       <Masthead />
       <section className="hero">
         <div className="hero-text">
-          {stats.data ? <div className="total label">
-            <p>Wet waste promised in writing, Pune: <b>{kg(stats.data.wet_kg_day_total)} kg a day</b></p>
-            <p className="total-sub">{stats.data.counted_projects} projects checked, {stats.data.review_count} waiting for a person · as of {shortDate(stats.data.published_at.slice(0, 10))} ·{" "}
-              <Link className="ink" to="/how#data">how we count</Link></p>
-          </div> : !stats.error && <p className="total label sub">Pune total is loading…</p>}
-          <h1 className="headline">Read the fine print before you pay the fine.</h1>
-          <p className="lede">Pune's large housing projects promised the government, in writing, to process their own wet waste on site. VACHAN finds that promise for your building, and the page it is written on.</p>
-          <div id="search"><SearchTape value={q || params.get("label") || ""} autoFocus={hash === "#search"} /></div>
+          <p className="tagline">Read the fine print before you pay the fine.</p>
+          <h1 className="headline">Did your builder promise to process your society's wet waste?</h1>
+          <p className="lede">
+            {s ? `${s.owc_projects} of the ${s.counted_projects} Pune projects recommended for clearance did, in writing.` : "Pune's large housing projects did, in writing."}{" "}
+            Find the promise and its page. Then ask for the plant to run.
+          </p>
+          <div id="search"><SearchTape cta="Find the promise" value={q || params.get("label") || ""} /></div>
           <p className="hand try">try {EXAMPLES.map((e, i) => <span key={e.label}>
             <button className="ink hand linkish" onClick={() => example(e)}>{e.label}</button>{i < EXAMPLES.length - 2 ? ", " : i === EXAMPLES.length - 2 ? " or " : ""}
-          </span>)}, or <Link className="ink hand" to="/p/sia-mh-mis-277145-2022">see an example promise →</Link></p>
+          </span>)}</p>
+          <p className="away">Not from Pune? <Link className="ink" to={`/p/${EXAMPLE_ID}`}>See a real promise</Link></p>
         </div>
-        <div className="hero-map">
-          {projects.data ? <PuneMap points={projects.data} focus={focus} radiusKm={radius} />
+        <div className="hero-demo"><PhoneDemo projects={projects.data} /></div>
+      </section>
+
+      {(focus || q) && projects.data && <Results all={projects.data} focus={focus} q={q} label={params.get("label")} radius={radius} setRadius={setRadius} />}
+
+      <Chain s={s} />
+      <Paths />
+
+      <section className="atlas">
+        <div className="atlas-text">
+          <h2>Every dot is a written promise</h2>
+          <p>{s ? `${s.projects} housing project sites` : "Housing project sites"} in Pune (PMC) and Pimpri-Chinchwad (PCMC). A bigger dot means more wet waste promised. A hollow dot means a person must check it.</p>
+          {s?.quotes_verified != null && <p className="label proof">{s.quotes_verified} of {s.quotes_checked} quotes re-checked against the live government PDF after the last run, {shortDate(s.published_at.slice(0, 10))}.</p>}
+          <Link className="ink" to="/how">How we find and check each promise</Link>
+        </div>
+        <div className="atlas-map">
+          {projects.data ? <PuneMap points={projects.data} focus={null} />
             : projects.error ? <ErrorState title="The map did not load." detail="Search still works." retry={projects.retry} />
               : <div className="map skeleton-map" aria-hidden="true" />}
         </div>
       </section>
 
-      {(focus || q) && projects.data && <Results all={projects.data} focus={focus} q={q} label={params.get("label")} radius={radius} setRadius={setRadius} />}
-
-      <ol className="strip" aria-label="How it works">
-        {STEPS.map((s, i) => (
-          <li key={s.t}>
-            <Link to={s.to} className="step">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><InkPath d={s.icon} width={1.3} play={false} /></svg>
-              <span className="label">{s.t}</span>
-            </Link>
-            {i < STEPS.length - 1 && <svg className="step-arrow" viewBox="0 0 40 20" aria-hidden="true"><InkPath d={roughLine([2, 10], [36, 10], i + 3)} width={2} play={false} /><path d="M28 4l8 6-8 6" fill="none" stroke="var(--ink)" strokeWidth="2" strokeLinecap="round" /></svg>}
-          </li>
-        ))}
-      </ol>
-
-      <Story total={stats.data?.wet_kg_day_total} />
+      <Story total={s?.wet_kg_day_total} />
       <footer className="foot-note sub">
-        Source: SEAC minutes on PARIVESH{stats.data && `, newest meeting ${shortDate(stats.data.newest_meeting_date)}`}. A promise is not proof that a plant was built or runs. <Link className="ink" to="/how">How it works</Link>
+        Source: SEAC minutes on PARIVESH{s && `, newest meeting ${shortDate(s.newest_meeting_date)}`}. A promise is not proof that a plant was built or runs. <Link className="ink" to="/how">How it works</Link>
       </footer>
     </Desk>
+  );
+}
+
+/** Problem, solution, how, outcome, impact: one sequence, joined by drawn arrows. */
+function Chain({ s }: { s?: Stats }) {
+  return (
+    <section className="chain" aria-labelledby="chain-h">
+      <h2 id="chain-h" className="sr-only">From the problem to the impact</h2>
+      <ol>
+        <li className="link problem">
+          <span className="hand cue">The problem</span>
+          <p className="fig">300 t</p>
+          <p>of wet waste a day goes from Pune's housing societies and malls to city plants, says <a className="ink" href={PMC_SOURCE} target="_blank" rel="noreferrer">PMC</a>.</p>
+          <p className="sub">In Pimpri-Chinchwad, <a className="ink" href={PCMC_SOURCE} target="_blank" rel="noreferrer">notices</a> set fines for large societies that don't process their own.</p>
+        </li>
+        <li className="link">
+          <span className="hand cue">The solution</span>
+          <p className="say">The builder already promised to fix it.</p>
+          <p>To get environmental clearance, each large project promised in writing to process its wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.</p>
+        </li>
+        <li className="link">
+          <span className="hand cue">How</span>
+          <ol className="mini-steps">
+            <li>Search your area</li>
+            <li>See the promise and its page</li>
+            <li>Ask for the plant to run</li>
+          </ol>
+        </li>
+        <li className="link">
+          <span className="hand cue">The outcome</span>
+          <p className="say">A letter that quotes the builder's own promise.</p>
+          <p>It goes to the builder or the ward office, with the page. Ward officers get a list of whom to check first.</p>
+        </li>
+        <li className="link impact">
+          <span className="hand cue">The impact</span>
+          <p className="fig">{s ? `${tonnes(s.wet_kg_day_total)} t` : "…"}</p>
+          <p>of wet waste a day, promised in writing to be processed on site across Pune. Every plant that runs keeps that waste where it is made, off the trucks to Moshi and Hadapsar.</p>
+        </li>
+      </ol>
+    </section>
+  );
+}
+
+/** The two people who use VACHAN, side by side. */
+function Paths() {
+  return (
+    <section className="paths" aria-label="Who VACHAN is for">
+      <div className="path">
+        <h2>For residents and flat buyers</h2>
+        <p className="sub">Your society got a wet-waste notice, or you are about to buy a flat.</p>
+        <ul className="ticks-list">
+          <li>See what your builder promised in writing, and the page</li>
+          <li>Send a letter asking for the plant to run</li>
+          <li>Share it with your society group</li>
+        </ul>
+        <button className="btn" onClick={focusSearch}>Find your building's promise</button>
+      </div>
+      <div className="path officer-path">
+        <h2>For ward officers</h2>
+        <p className="sub">PCMC is surveying about 1,155 large waste generators. Where do you start?</p>
+        <ul className="ticks-list">
+          <li>A list for your ward, biggest written promises first</li>
+          <li>Each row links to its page in the minutes</li>
+          <li>Print it for field visits. It plans visits; it is not a verdict.</li>
+        </ul>
+        <Link className="btn ghost" to="/officer">Open the ward list</Link>
+      </div>
+    </section>
   );
 }
 
@@ -103,6 +179,7 @@ function Results({ all, focus, q, label, radius, setRadius }: {
       <div className="results-list">
         <h2>{heading}</h2>
         {focus && label && <p className="sub">around {label}</p>}
+        {rows.length > 0 && <p className="hand pick-one">Open one to see the page and ask for the plant to run.</p>}
         {rows.length === 0 ? (focus
           ? <Empty title={`No written promises within ${radius} km of this address.`}>{radius < 5 && <button className="btn" onClick={() => setRadius(5)}>Search 5 km</button>}</Empty>
           : <Empty title="No projects match this search." />)
@@ -122,3 +199,4 @@ function Results({ all, focus, q, label, radius, setRadius }: {
     </section>
   );
 }
+

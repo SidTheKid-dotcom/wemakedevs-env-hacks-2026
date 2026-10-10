@@ -64,8 +64,8 @@ p { margin: 0; }
 /* phones: the links take a second row under the wordmark, so both always show */
 @media (max-width: 599px) {
   .masthead { flex-wrap: wrap; row-gap: 4px; }
-  .nav { order: 3; width: 100%; gap: 20px; }
-  .nav .ink { min-height: 44px; font-size: 15px; }
+  .nav { order: 3; width: 100%; gap: 0 16px; flex-wrap: wrap; }
+  .nav .ink { min-height: 44px; font-size: 14px; }
   .nav .btn.round { position: absolute; right: 0; top: 0; }
   .masthead { position: relative; }
 }

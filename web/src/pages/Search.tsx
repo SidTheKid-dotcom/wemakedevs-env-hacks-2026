@@ -29,7 +29,8 @@ export async function goToPlace(place: Place, nav: ReturnType<typeof useNavigate
   nav(`/?near=${pos.lat.toFixed(5)},${pos.lon.toFixed(5)}&label=${encodeURIComponent(place.title)}#near`);
 }
 
-export function SearchTape({ autoFocus = false, value = "" }: { autoFocus?: boolean; value?: string }) {
+/** `cta` shows a worded button ("Find the promise") instead of the round search icon. */
+export function SearchTape({ autoFocus = false, value = "", cta }: { autoFocus?: boolean; value?: string; cta?: string }) {
   const nav = useNavigate();
   const [q, setQ] = useState(value);
   const [open, setOpen] = useState(false);
@@ -71,17 +72,18 @@ export function SearchTape({ autoFocus = false, value = "" }: { autoFocus?: bool
   };
 
   return (
-    <form className="search" role="search" onSubmit={(e) => { e.preventDefault(); if (options[0]) choose(options[active] || options[0]); }}>
+    <form className={`search${cta ? " has-cta" : ""}`} role="search" onSubmit={(e) => { e.preventDefault(); if (options[0]) choose(options[active] || options[0]); }}>
       <div className="search-row">
         <input className="search-input" type="search" value={q} autoFocus={autoFocus} autoComplete="off" spellCheck={false}
-          placeholder="Your address, project or builder" aria-label="Search by address, project, builder or village"
+          placeholder="Area, project or builder" aria-label="Search by area, address, project, builder or village"
           role="combobox" aria-expanded={open && options.length > 0} aria-controls={listId} aria-autocomplete="list"
           aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}
           onChange={(e) => { setQ(e.target.value); setOpen(true); setActive(-1); }} onKeyDown={key}
           onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 150)} />
-        <button className="btn round" aria-label="Search">
+        {!cta && <button className="btn round" aria-label="Search">
           <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="none" stroke="#fff" strokeWidth="2.6" /><path d="M15 15l5.5 5.5" stroke="#fff" strokeWidth="2.8" strokeLinecap="round" /></svg>
-        </button>
+        </button>}
+        {cta && <button className="btn search-cta">{cta}</button>}
       </div>
       {open && options.length > 0 && (
         <ul className="suggest" id={listId} role="listbox">
