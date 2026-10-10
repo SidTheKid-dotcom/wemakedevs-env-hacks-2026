@@ -6,7 +6,7 @@ import { reducedMotion } from "../motion";
 import { Stamp } from "../ui/Ink";
 import { Dialog } from "../ui/Parts";
 import { Reading } from "../ui/Reading";
-import { t, useLang } from "../i18n";
+import { t, t2, useLang } from "../i18n";
 
 const FORBIDDEN = /violat|fail|illegal|missing|fraud/i; // guard: a letter must never accuse
 
@@ -92,7 +92,7 @@ export function LetterSheet({ p, onClose }: { p: Project; onClose: () => void })
           {/* No recipient: no municipal address is published that we could verify, so the person adds their own. */}
           <a className="btn ghost" href={`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text + "\n\n" + cardUrl)}`}>{t("Send by email")}</a>
         </div>
-        <p className="note">Email opens with the letter ready. Add your {to === "builder" ? "builder's" : `${p.city} ward office`} address in the To field.</p>
+        <p className="note">{to === "builder" ? t("Email opens with the letter ready. Add your builder's address in the To field.") : t2("Email opens with the letter ready. Add your {city} ward office's address in the To field.", { city: p.city })}</p>
         <p className="sr-only" aria-live="polite">{copied ? "Letter copied" : !typing ? "Letter ready" : ""}</p>
       </div>}
 

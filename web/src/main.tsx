@@ -6,6 +6,7 @@ import "./screens.css";
 import { installTextures } from "./textures";
 import { Desk } from "./ui/Desk";
 import { Empty, Loading, Masthead } from "./ui/Parts";
+import { t, useLang } from "./i18n";
 
 installTextures();
 const Home = lazy(() => import("./pages/Home"));
@@ -15,7 +16,8 @@ const Officer = lazy(() => import("./pages/Officer"));
 const How = lazy(() => import("./pages/How"));
 
 function NotFound() {
-  return <Desk><Masthead /><Empty title="This page is not on the desk."><Link className="btn" to="/">Go to the search</Link></Empty></Desk>;
+  useLang();
+  return <Desk><Masthead /><Empty title={t("This page is not on the desk.")}><Link className="btn" to="/">{t("Go to the search")}</Link></Empty></Desk>;
 }
 
 /** The sheet stays put on route changes; only its content fades (SPEC 6.5). */

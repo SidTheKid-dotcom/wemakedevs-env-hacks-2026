@@ -7,6 +7,7 @@ import { useLoad } from "../useLoad";
 import { Desk } from "../ui/Desk";
 import { InkPath, Tick } from "../ui/Ink";
 import { Masthead } from "../ui/Parts";
+import { dateLocale, t, t2, tl, useLang } from "../i18n";
 
 const STEPS = [
   { id: "fetch", t: "Every night", s: "EventBridge", icon: "M4 7h16v13H4z M4 11h16 M8 4v5 M16 4v5 M8 14h2 M12 14h2 M16 14h2 M8 17h2 M12 17h2" },
@@ -30,10 +31,11 @@ const CHAIN = [
 const TICKS = ["Found word for word in the minutes", "Operation phase, not construction", "Wet waste per flat in the usual range (0.5 to 3 kg)", "Recommended for clearance"];
 
 export default function How() {
+  useLang();
   const { data: s } = useLoad(getStats, []);
   const strip = useRef<HTMLOListElement>(null);
   const [drawn, setDrawn] = useState(false);
-  useEffect(() => { document.title = "How VACHAN works"; }, []);
+  useEffect(() => { document.title = t("How VACHAN works"); });
   useEffect(() => { // arrows draw in, one after the other, when the diagram comes into view
     const io = new IntersectionObserver(([e]) => e.isIntersecting && (setDrawn(true), io.disconnect()), { threshold: 0.3 });
     io.observe(strip.current!);
@@ -44,67 +46,67 @@ export default function How() {
     <Desk props="plain" pot={false}>
       <Masthead />
       <article className="how">
-        <h1>How VACHAN works</h1>
-        <p className="how-lede">To get environmental clearance, each large housing project tells a state committee how it will handle its waste. The committee's meeting minutes are public, on a government website called PARIVESH. VACHAN reads them for you.</p>
+        <h1>{t("How VACHAN works")}</h1>
+        <p className="how-lede">{t("To get environmental clearance, each large housing project tells a state committee how it will handle its waste. The committee's meeting minutes are public, on a government website called PARIVESH. VACHAN reads them for you.")}</p>
         <ol className="flow three">
           {SIMPLE.map((st, i) => (
             <li key={st.t} className="flow-box">
               <svg className="flow-frame" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 <InkPath d={roughLine([2, 2], [98, 3], i) + roughLine([98, 3], [97, 98], i + 1) + roughLine([97, 98], [3, 97], i + 2) + roughLine([3, 97], [2, 2], i + 3)} width={1.6} color="var(--leaf)" play={false} />
               </svg>
-              <span className="hand cue">{st.t}</span>
+              <span className="hand cue">{t(st.t)}</span>
               <svg className="flow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d={st.icon} fill="none" stroke="var(--leaf)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              <b>{st.b}</b>
-              <span className="sub">{st.s}</span>
+              <b>{t(st.b)}</b>
+              <span className="sub">{t(st.s)}</span>
               {i < SIMPLE.length - 1 && <svg className="flow-arrow" viewBox="0 0 30 30" aria-hidden="true"><path d="M3 15 L25 15 M18 8 L26 15 L18 22" fill="none" stroke="var(--leaf)" strokeWidth="2.4" strokeLinecap="round" /></svg>}
             </li>
           ))}
         </ol>
-        <ol className="why-chain" aria-label="From the problem to the solution">
-          {CHAIN.map((c) => <li key={c.k}><span className="hand cue">{c.k}</span><span>{c.t}</span></li>)}
+        <ol className="why-chain" aria-label={t("From the problem to the solution")}>
+          {CHAIN.map((c) => <li key={c.k}><span className="hand cue">{t(c.k)}</span><span>{t(c.t)}</span></li>)}
         </ol>
         <p className="label fresh">
-          Source: SEAC minutes on PARIVESH.{s && <> Newest meeting {longDate(s.newest_meeting_date)}. Published {new Date(s.published_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}.</>}
+          {t("Source: SEAC minutes on PARIVESH.")}{s && <> {t2("Newest meeting {date}.", { date: longDate(s.newest_meeting_date) })} {t2("Published {when}.", { when: new Date(s.published_at).toLocaleString(dateLocale(), { dateStyle: "medium", timeStyle: "short" }) })}</>}
         </p>
         <div className="how-cols">
           <section id="data">
-            <h2>What the numbers are</h2>
-            {s ? <p>Wet waste promised in writing across Pune: <b>{kg(s.wet_kg_day_total)} kg a day</b> (PMC {kg(s.wet_kg_day_pmc)}, PCMC {kg(s.wet_kg_day_pcmc)}). We count a project only if the committee recommended it and every check passed: {s.counted_projects} of {s.projects} project sites. Each site is counted once: the newest minutes win, and expansions of the same site fold into one. {s.review_count} records wait for a person to check them.</p>
-              : <p className="sub">Loading the numbers…</p>}
-            {s?.quotes_verified != null && <p className="label proof">{s.quotes_verified} of {s.quotes_checked} quotes re-checked against the live government PDF after the last run.</p>}
+            <h2>{t("What the numbers are")}</h2>
+            {s ? <p>{tl("Wet waste promised in writing across Pune: {total} (PMC {pmc}, PCMC {pcmc}).", { total: <b>{kg(s.wet_kg_day_total)} {t("kg a day")}</b>, pmc: kg(s.wet_kg_day_pmc), pcmc: kg(s.wet_kg_day_pcmc) })} {t2("We count a project only if the committee recommended it and every check passed: {c} of {n} project sites.", { c: s.counted_projects, n: s.projects })} {t("Each site is counted once: the newest minutes win, and expansions of the same site fold into one.")} {t2("{r} records wait for a person to check them.", { r: s.review_count })}</p>
+              : <p className="sub">{t("Loading the numbers…")}</p>}
+            {s?.quotes_verified != null && <p className="label proof">{t2("{v} of {c} quotes re-checked against the live government PDF after the last run.", { v: s.quotes_verified, c: s.quotes_checked ?? 0 })}</p>}
           </section>
           <section id="check">
-            <h2>What the ticks mean</h2>
-            <ul className="checks">{TICKS.map((t, i) => <li key={t}><Tick ok seed={i + 3} play={false} /><span>{t}</span></li>)}</ul>
-            <p className="sub">The model only reads. Plain code finds the quoted line, the page and the phase, and decides whether a record is shown as checked.</p>
+            <h2>{t("What the ticks mean")}</h2>
+            <ul className="checks">{TICKS.map((k, i) => <li key={k}><Tick ok seed={i + 3} play={false} /><span>{t(k)}</span></li>)}</ul>
+            <p className="sub">{t("The model only reads. Plain code finds the quoted line, the page and the phase, and decides whether a record is shown as checked.")}</p>
           </section>
           <section>
-            <h2>What we have not built</h2>
-            <p>We do not know whether a plant runs today. We show what was promised in writing, and the page it is written on. Projects cleared before 2019, and buildings below the clearance size, are not in these minutes.</p>
+            <h2>{t("What we have not built")}</h2>
+            <p>{t("We do not know whether a plant runs today. We show what was promised in writing, and the page it is written on. Projects cleared before 2019, and buildings below the clearance size, are not in these minutes.")}</p>
           </section>
           <section id="credits">
-            <h2>Credits</h2>
+            <h2>{t("Credits")}</h2>
             <ul className="plain">
-              <li>Minutes: <a className="ink hand" href="https://parivesh.nic.in/" target="_blank" rel="noreferrer">PARIVESH</a>, Ministry of Environment, Forest and Climate Change</li>
-              <li>Ward maps: <a className="ink hand" href="https://github.com/datameet/Municipal_Spatial_Data" target="_blank" rel="noreferrer">DataMeet</a>, <a className="ink hand" href="https://creativecommons.org/licenses/by-sa/2.5/in/" target="_blank" rel="noreferrer">CC BY-SA 2.5 IN</a></li>
-              <li>Address search: Amazon Location Service</li>
-              <li>Desk props: modelled and rendered in Blender by the team</li>
-              <li>AI tools: Claude Code, ChatGPT images (design concepts), Amazon Bedrock (reading the minutes and drafting letters)</li>
+              <li>{t("Minutes:")} <a className="ink hand" href="https://parivesh.nic.in/" target="_blank" rel="noreferrer">PARIVESH</a>, {t("Ministry of Environment, Forest and Climate Change")}</li>
+              <li>{t("Ward maps:")} <a className="ink hand" href="https://github.com/datameet/Municipal_Spatial_Data" target="_blank" rel="noreferrer">DataMeet</a>, <a className="ink hand" href="https://creativecommons.org/licenses/by-sa/2.5/in/" target="_blank" rel="noreferrer">CC BY-SA 2.5 IN</a></li>
+              <li>{t("Address search:")} Amazon Location Service</li>
+              <li>{t("Desk props: modelled and rendered in Blender by the team")}</li>
+              <li>{t("AI tools: Claude Code, ChatGPT images (design concepts), Amazon Bedrock (reading the minutes and drafting letters)")}</li>
             </ul>
           </section>
         </div>
         <details className="hood">
-          <summary><h2>Under the hood: the AWS pipeline</h2></summary>
-          <p className="sub">For the technically curious. Every night the pipeline reads new minutes and re-checks every quote.</p>
+          <summary><h2>{t("Under the hood: the AWS pipeline")}</h2></summary>
+          <p className="sub">{t("For the technically curious. Every night the pipeline reads new minutes and re-checks every quote.")}</p>
         <ol className="flow" ref={strip}>
             {STEPS.map((st, i) => (
               <li key={st.id} id={st.id} className="flow-box">
                 <svg className="flow-frame" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                   <InkPath d={roughLine([2, 2], [98, 3], i) + roughLine([98, 3], [97, 98], i + 1) + roughLine([97, 98], [3, 97], i + 2) + roughLine([3, 97], [2, 2], i + 3)} width={1.6} color="var(--leaf)" play={false} />
                 </svg>
-                <b>{st.t}</b>
+                <b>{t(st.t)}</b>
                 <svg className="flow-icon" viewBox="0 0 24 24" aria-hidden="true"><path d={st.icon} fill="none" stroke="var(--leaf)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <span className="label">{st.s}</span>
+                <span className="label">{t(st.s)}</span>
                 {i < STEPS.length - 1 && <svg className="flow-arrow" viewBox="0 0 30 30" aria-hidden="true">
                   <InkPath d="M3 15 L25 15 M18 8 L26 15 L18 22" color="var(--leaf)" width={2.4} play={drawn} delay={i * 300} dur={300} />
                 </svg>}

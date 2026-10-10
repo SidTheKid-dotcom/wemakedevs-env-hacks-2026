@@ -13,7 +13,7 @@ import { SearchTape } from "./Search";
 import { LetterSheet } from "./Letter";
 import { ShareSheet } from "./Share";
 import { PdfPeek } from "../ui/PdfPeek";
-import { t, t2, useLang } from "../i18n";
+import { t, t2, tl, useLang } from "../i18n";
 
 export default function PromisePage() {
   const { id = "" } = useParams();
@@ -74,7 +74,7 @@ function checkLabel(p: Project, name: string, pass: boolean) {
     case "found_in_minutes": return pass ? t("Found word for word in the minutes") : t("Could not find this figure word for word");
     case "operation_phase": return pass ? t("Operation phase, not construction") : t("Could not tell the operation phase from construction");
     case "kg_per_flat": return t2(pass ? "{n} kg a flat a day, in the usual range" : "{n} kg a flat a day, outside 0.5 to 3", { n: perFlat ?? "?" });
-    case "decision_known": return p.decision === "recommended" ? t("Recommended for clearance") : pass ? `Committee decision: ${p.decision?.replace("_", " ")}` : t("Could not read the committee's decision");
+    case "decision_known": return p.decision === "recommended" ? t("Recommended for clearance") : pass ? t2("Committee decision: {d}", { d: t(p.decision?.replace("_", " ") || "") }) : t("Could not read the committee's decision");
     case "owc_capacity": return pass ? t("Plant capacity covers the promised waste") : t("Stated plant capacity is below the promised waste");
     default: return name;
   }
@@ -98,7 +98,7 @@ function Card({ p }: { p: Project }) {
     <article className={`card${review ? " review" : ""}`}>
       <div className="card-left">
         {!review && <p className="kicker hand">{t("What the builder promised in writing")}</p>}
-        <h1 className="place">{placeName(p)}</h1>
+        <h1 className="place" data-data>{placeName(p)}</h1>
         <p className="sub city-line">{t2("{city}, ward {w}", { city: t(cityName(p.city)), w: p.ward })}</p>
         <a className="number" id="num" href={pdfUrl(p)} target="_blank" rel="noreferrer"
           aria-label={`${kg(p.wet_kg_day)} kilograms of wet waste a day, ${review ? "as read by machine" : "promised in writing"}. Opens the PDF page.`}>
@@ -112,7 +112,7 @@ function Card({ p }: { p: Project }) {
         {!review && <>
           <p className="promised">{t("promised in writing to be processed on site:")}</p>
           {m ? <p className="method">{m}<Underline seed={4} delay={400 * d} dur={500} /></p>
-            : <p className="sub">No on-site method found in the minutes.</p>}
+            : <p className="sub">{t("No on-site method found in the minutes.")}</p>}
         </>}
         {review && <p className="label reason">{t(p.review_reason || "")}</p>}
         {!review && p.wet_kg_day ? <p className="outcome">
@@ -121,7 +121,7 @@ function Card({ p }: { p: Project }) {
         <p className="note">{t("The builder promised in writing to process this waste on site. Ask whether the plant is built and running.")}</p>
         {p.city === "PCMC" && <p className="sub fines">{t("PCMC notices set fines for large societies that don't process wet waste.")}</p>}
         <div className="actions">
-          {review ? <a className="btn" href={pdfUrl(p)} target="_blank" rel="noreferrer">Open the page</a>
+          {review ? <a className="btn" href={pdfUrl(p)} target="_blank" rel="noreferrer">{t("Open the page")}</a>
             : <button className="btn" onClick={() => setSheet("letter")}>{t("Ask for the plant to run")}</button>}
           <button className="btn ghost share-btn" onClick={() => setSheet("share")} aria-label={t("Send to my society group")}>
             <span className="lbl">{t("Send to my society group")}</span>
@@ -136,20 +136,20 @@ function Card({ p }: { p: Project }) {
           <Washi style={{ left: 18, top: -12, transform: "rotate(-24deg)" }} seed={5} />
           <Washi style={{ right: 70, top: -10, transform: "rotate(18deg)" }} seed={8} />
           <div className="clipping">
-          <figcaption>SEAC minutes, {longDate(p.meeting_date)}, page {p.source.page}</figcaption>
+          <figcaption>{t2("SEAC minutes, {date}, page {p}", { date: longDate(p.meeting_date), p: p.source.page })}</figcaption>
           <p className="op">{t("Operation Phase")}</p>
           <p className="quote" id="quote">
             {p.owc_quote ? (review || !found ? <span className="hl-text">{p.owc_quote}</span>
               : <Highlight delay={150 * d} dur={600} play={play}>{p.owc_quote}</Highlight>)
-              : <span className="sub">The wet-waste line could not be found word for word.</span>}
+              : <span className="sub">{t("The wet-waste line could not be found word for word.")}</span>}
           </p>
           </div>
           {opPhase && !review && <span className="label annotate">{t("Operation phase, not construction")}</span>}
         </figure>
         <span className="card-stamp">
-          {review ? <Stamp lines={["A person", "must check", "this"]} color="var(--rust)" shape="box" rotate={-6} delay={400 * d} play={play} />
-            : p.status === "verified" ? <Stamp lines={["Checked", "by a", "person"]} color="var(--leaf)" delay={1200 * d} play={play} />
-              : p.decision === "recommended" && <Stamp lines={["Recommended", "for clearance", longDate(p.meeting_date)]} delay={1200 * d} play={play} />}
+          {review ? <Stamp lines={t("A person|must check|this").split("|")} color="var(--rust)" shape="box" rotate={-6} delay={400 * d} play={play} />
+            : p.status === "verified" ? <Stamp lines={t("Checked|by a|person").split("|")} color="var(--leaf)" delay={1200 * d} play={play} />
+              : p.decision === "recommended" && <Stamp lines={[...t("Recommended|for clearance").split("|"), longDate(p.meeting_date)]} delay={1200 * d} play={play} />}
         </span>
         <div className="links">
           <button className="ink hand linkish" onClick={() => setSheet("peek")}>{review ? t("Open the page and check it yourself") : t2("See it on page {p}", { p: p.source.page })}</button>
@@ -168,13 +168,13 @@ function Card({ p }: { p: Project }) {
       </div>
 
       <dl className="facts">
-        {builder && <div><dt>{t("Builder:")}</dt><dd className="label">{builder}</dd></div>}
+        {builder && <div><dt>{t("Builder:")}</dt><dd className="label" data-data>{builder}</dd></div>}
         {p.tenements && <div><dt>{t("Flats:")}</dt><dd className="label">{p.tenements}</dd></div>}
         <div><dt>{p.decision === "recommended" ? t("Recommended for clearance:") : t("Committee meeting:")}</dt><dd className="label">{longDate(p.meeting_date)}</dd></div>
         <div><dt>{t("Proposal:")}</dt><dd className="label">{p.proposal_id.replace("SIA/MH/", "")}</dd></div>
-        {builder && <Link className="ink hand" to={`/b/${builderSlug(builder)}`}>Other projects by {builder}</Link>}
+        {builder && <Link className="ink hand" to={`/b/${builderSlug(builder)}`}>{tl("Other projects by {builder}", { builder: <span data-data>{builder}</span> })}</Link>}
       </dl>
-      <p className="about sub">VACHAN reads Pune's public environmental-clearance minutes and shows what each builder promised to do with wet waste. {t("A promise is not proof that a plant was built or runs.")} <Link className="ink hand" to="/">{t("Search another building")}</Link></p>
+      <p className="about sub">{t("VACHAN reads Pune's public environmental-clearance minutes and shows what each builder promised to do with wet waste.")} {t("A promise is not proof that a plant was built or runs.")} <Link className="ink hand" to="/">{t("Search another building")}</Link></p>
       <p className="fixit sub">
         {t("Spotted a mistake on this card?")} <a className="ink hand" target="_blank" rel="noreferrer"
           href={`https://github.com/SidTheKid-dotcom/wemakedevs-env-hacks-2026/issues/new?title=${encodeURIComponent(`Mistake on ${p.proposal_id}`)}&body=${encodeURIComponent(`Card: ${location.href}\nSource page: ${p.source.page} of ${p.source.mirror_url}\n\nWhat looks wrong:\n`)}`}>{t("Tell us")}</a>{t(", with the page it is on.")}

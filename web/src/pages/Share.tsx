@@ -32,8 +32,8 @@ export function ShareSheet({ p, onClose }: { p: Project; onClose: () => void }) 
           <Washi style={{ left: "38%", top: -12 }} seed={2} />
           <b className="wm">VACHAN</b>
           <span className="mini-num">{kg(p.wet_kg_day)} kg</span>
-          <span>of wet waste a day</span>
-          <span className="sub">{placeName(p)}</span>
+          <span>{t("of wet waste a day")}</span>
+          <span className="sub" data-data>{placeName(p)}</span>
         </div>
         <button className="btn wide" onClick={copy}>{copied ? t("Link copied") : t("Copy link")}</button>
         <a className="btn ghost wide" href={`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`} target="_blank" rel="noreferrer">{t("Send on WhatsApp")}</a>

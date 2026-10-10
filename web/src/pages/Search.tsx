@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProjects, placePosition, placesEnabled, suggestPlaces, type Place, type Summary } from "../api";
 import { kg, norm, placeName, title } from "../format";
-import { t, useLang } from "../i18n";
+import { t, t2, useLang } from "../i18n";
 
 type Option = { kind: "project"; p: Summary } | { kind: "place"; place: Place } | { kind: "query"; q: string };
 
@@ -92,14 +92,14 @@ export function SearchTape({ autoFocus = false, value = "", cta }: { autoFocus?:
           {options.map((o, i) => (
             <li key={i} id={`${listId}-${i}`} role="option" aria-selected={i === active} className={`label${i === active ? " on" : ""}`}
               onMouseDown={(e) => { e.preventDefault(); choose(o); }}>
-              {o.kind === "project" && <><b>{kg(o.p.wet_kg_day)} kg a day</b> <span>{placeName(o.p)}</span></>}
+              {o.kind === "project" && <><b>{kg(o.p.wet_kg_day)} {t("kg a day")}</b> <span>{placeName(o.p)}</span></>}
               {o.kind === "place" && <><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 22s7-7.2 7-12.5A7 7 0 0 0 5 9.5C5 14.8 12 22 12 22z" fill="var(--leaf)" /><circle cx="12" cy="9.5" r="2.6" fill="var(--label)" /></svg> <span>{o.place.title}</span></>}
-              {o.kind === "query" && <span>All projects matching “{title(o.q)}”</span>}
+              {o.kind === "query" && <span>{t2("All projects matching “{q}”", { q: title(o.q) })}</span>}
             </li>
           ))}
         </ul>
       )}
-      {placesDown && <p className="sub" role="status">Address search did not answer. Search by project or village instead.</p>}
+      {placesDown && <p className="sub" role="status">{t("Address search did not answer. Search by project or village instead.")}</p>}
       <p className="sr-only" aria-live="polite">{open && options.length ? `${options.length} suggestions` : ""}</p>
     </form>
   );

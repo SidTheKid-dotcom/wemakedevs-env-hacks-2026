@@ -9,7 +9,7 @@ import { Desk } from "../ui/Desk";
 import { PhoneDemo } from "../ui/PhoneDemo";
 import { Empty, ErrorState, Masthead } from "../ui/Parts";
 import { goToPlace, matchProjects, SearchTape } from "./Search";
-import { t, t2, useLang } from "../i18n";
+import { t, t2, tl, useLang } from "../i18n";
 
 const EXAMPLES: { label: string; q?: string; place?: string }[] = [
   { label: "Punawale", q: "Punawale" }, { label: "Hadapsar", q: "Hadapsar" }, { label: "Seasons Mall", place: "Seasons Mall, Hadapsar, Pune" },
@@ -63,7 +63,7 @@ export default function Home() {
           </p>
           <div id="search"><SearchTape cta={t("Find the promise")} value={q || params.get("label") || ""} /></div>
           <p className="hand try">{t("try")} {EXAMPLES.map((e, i) => <span key={e.label}>
-            <button className="ink hand linkish" onClick={() => example(e)}>{e.label}</button>{i < EXAMPLES.length - 2 ? ", " : i === EXAMPLES.length - 2 ? ` ${t("or")} ` : ""}
+            <button className="ink hand linkish" onClick={() => example(e)}>{t(e.label)}</button>{i < EXAMPLES.length - 2 ? ", " : i === EXAMPLES.length - 2 ? ` ${t("or")} ` : ""}
           </span>)}</p>
           <p className="away">{t("Not from Pune?")} <Link className="ink hand" to={`/p/${EXAMPLE_ID}`}>{t("See a real promise")}</Link></p>
           {s?.quotes_verified != null && s.quotes_checked != null && <p className="label proof hero-proof">{t2("{v} of {c} quotes re-checked against the government PDF.", { v: s.quotes_verified, c: s.quotes_checked })}</p>}
@@ -90,12 +90,12 @@ export default function Home() {
       </section>
 
       <section className="closing">
-        <h2>{t("Is your society's plant running?")}</h2>
+        <h2>{t("Is your society's wet waste processing unit actually working?")}</h2>
         <p className="lede">{t("Find what your builder promised in writing, and the page it is on.")}</p>
         <SearchTape cta={t("Find the promise")} />
       </section>
       <footer className="foot-note sub">
-        Source: SEAC minutes on PARIVESH{s && `, newest meeting ${shortDate(s.newest_meeting_date)}`}. {t("A promise is not proof that a plant was built or runs.")} <Link className="ink hand" to="/how">{t("How it works")}</Link>
+        {s ? t2("Source: SEAC minutes on PARIVESH, newest meeting {date}.", { date: shortDate(s.newest_meeting_date) }) : t("Source: SEAC minutes on PARIVESH.")} {t("A promise is not proof that a plant was built or runs.")} <Link className="ink hand" to="/how">{t("How it works")}</Link>
       </footer>
     </Desk>
   );
@@ -110,8 +110,8 @@ function Chain({ s }: { s?: Stats }) {
         <li className="link problem">
           <span className="hand cue">{t("The problem")}</span>
           <p className="fig">300 t</p>
-          <p>of wet waste a day goes from Pune's housing societies and malls to city plants, says <a className="ink hand" href={PMC_SOURCE} target="_blank" rel="noreferrer">PMC</a>.</p>
-          <p className="sub">In Pimpri-Chinchwad, <a className="ink hand" href={PCMC_SOURCE} target="_blank" rel="noreferrer">notices</a> set fines for large societies that don't process their own.</p>
+          <p>{tl("of wet waste a day goes from Pune's housing societies and malls to city plants, says {pmc}.", { pmc: <a className="ink hand" href={PMC_SOURCE} target="_blank" rel="noreferrer">PMC</a> })}</p>
+          <p className="sub">{tl("In Pimpri-Chinchwad, {notices} set fines for large societies that don't process their own.", { notices: <a className="ink hand" href={PCMC_SOURCE} target="_blank" rel="noreferrer">{t("notices")}</a> })}</p>
         </li>
         <li className="link">
           <span className="hand cue">{t("The solution")}</span>
@@ -176,26 +176,27 @@ function Results({ all, focus, q, label, radius, setRadius }: {
     ? all.filter((p) => p.decision === "recommended").map((p) => ({ p, d: km(focus, p) })).filter((r) => r.d <= radius).sort((a, b) => a.d - b.d)
     : matchProjects(all, q || "", 60).map((p) => ({ p, d: null as number | null })), [all, focus, q, radius]);
   const [hover, setHover] = useState<string | null>(null);
-  const heading = focus ? `${rows.length} ${rows.length === 1 ? "promise" : "promises"} within ${radius} km` : `${rows.length} projects matching “${title(q || "")}”`;
+  const heading = focus ? t2(rows.length === 1 ? "{n} promise within {r} km" : "{n} promises within {r} km", { n: rows.length, r: radius })
+    : t2("{n} projects matching “{q}”", { n: rows.length, q: title(q || "") });
 
   return (
     <section className="results" id="near" aria-live="polite">
       <div className="results-map">{focus && <PuneMap points={rows.map((r) => r.p)} focus={focus} radiusKm={radius} highlight={hover} label={`Promises near ${label}`} />}</div>
       <div className="results-list">
         <h2>{heading}</h2>
-        {focus && label && <p className="sub">around {label}</p>}
+        {focus && label && <p className="sub">{t2("around {place}", { place: label })}</p>}
         {rows.length > 0 && <p className="hand pick-one">{t("Open one to see the page and ask for the plant to run.")}</p>}
         {rows.length === 0 ? (focus
-          ? <Empty title={`No written promises within ${radius} km of this address.`}>{radius < 5 && <button className="btn" onClick={() => setRadius(5)}>Search 5 km</button>}</Empty>
+          ? <Empty title={t2("No written promises within {r} km of this address.", { r: radius })}>{radius < 5 && <button className="btn" onClick={() => setRadius(5)}>{t("Search 5 km")}</button>}</Empty>
           : <Empty title={t("No projects match this search.")} />)
           : <ul className="rows">
             {rows.slice(0, 40).map(({ p, d }, i) => (
               <li key={p.id} className="fade-in" style={{ "--delay": `${Math.min(i, 12) * 40}ms` } as React.CSSProperties}
                 onMouseEnter={() => setHover(p.id)} onMouseLeave={() => setHover(null)}>
                 <Link to={`/p/${p.id}`} className="row">
-                  <b className={p.status === "review" ? "pencil" : ""}>{kg(p.wet_kg_day)} kg a day</b>
-                  <span>{placeName(p)}</span>
-                  <span className="sub">{[d != null && `${d.toFixed(1)} km`, method(p.quote), p.status === "review" && "a person must check"].filter(Boolean).join(", ")}</span>
+                  <b className={p.status === "review" ? "pencil" : ""}>{kg(p.wet_kg_day)} {t("kg a day")}</b>
+                  <span data-data>{placeName(p)}</span>
+                  <span className="sub">{[d != null && `${d.toFixed(1)} km`, method(p.quote), p.status === "review" && t("a person must check")].filter(Boolean).join(", ")}</span>
                 </Link>
               </li>
             ))}

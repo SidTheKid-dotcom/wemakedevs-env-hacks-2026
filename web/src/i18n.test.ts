@@ -50,3 +50,46 @@ describe.each(["mr", "hi"] as const)("%s translations", (lang) => {
     expect(entries(lang).filter(([, v]) => v !== v.trim())).toEqual([]);
   });
 });
+
+// ---- coverage: these three would have caught every gap found by hand on 10 Oct ----
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+
+const SRC = join(__dirname);
+const files = (dir: string): string[] => readdirSync(dir).flatMap((f) => {
+  const p = join(dir, f);
+  return statSync(p).isDirectory() ? files(p) : /\.tsx?$/.test(f) && !/\.test\./.test(f) ? [p] : [];
+});
+/** Every English key the code asks for as a literal: t("…"), t2("…", …), tl("…", …), and split stamp lines. */
+const usedKeys = () => {
+  const keys = new Set<string>();
+  for (const f of files(SRC).filter((p) => !p.endsWith("i18n.ts"))) { // its doc comment holds example calls
+    const code = readFileSync(f, "utf8");
+    for (const m of code.matchAll(/\bt[2l]?\(\s*"((?:[^"\\]|\\.)*)"/g)) keys.add(m[1].replace(/\\"/g, '"'));
+    for (const m of code.matchAll(/\bt[2l]?\(\s*[^"()]+\?\s*"((?:[^"\\]|\\.)*)"\s*:\s*"((?:[^"\\]|\\.)*)"/g)) { keys.add(m[1]); keys.add(m[2]); }
+  }
+  keys.delete(""); return keys;
+};
+
+describe("coverage", () => {
+  it("Marathi and Hindi translate exactly the same sentences", () => {
+    const mr = new Set(Object.keys(dictionaries.mr)), hi = new Set(Object.keys(dictionaries.hi));
+    expect([...mr].filter((k) => !hi.has(k))).toEqual([]);
+    expect([...hi].filter((k) => !mr.has(k))).toEqual([]);
+  });
+
+  it("every sentence the code shows has both translations", () => {
+    const missing = [...usedKeys()].filter((k) => !(k in dictionaries.mr) || !(k in dictionaries.hi));
+    expect(missing).toEqual([]);
+  });
+
+  it.each(["mr", "hi"] as const)("%s never repeats a phrase back to back", (lang) => {
+    const doubled = Object.values(dictionaries[lang]).filter((v) => {
+      const w = v.split(/\s+/);
+      for (let n = 1; n <= 3; n++) for (let i = 0; i + 2 * n <= w.length; i++)
+        if (w.slice(i, i + n).join(" ") === w.slice(i + n, i + 2 * n).join(" ") && w.slice(i, i + n).join("").length > 2) return true;
+      return false;
+    });
+    expect(doubled).toEqual([]);
+  });
+});

@@ -36,9 +36,9 @@ export default function Officer() {
               <p className="sub">{t("Projects in this ward that promised to process the most wet waste on site, largest first. Use it to choose where to visit first. Being on this list does not mean anything is wrong.")}</p>
               <div className="ward-pick">
                 <label className="label select" key={ward}>
-                  <span className="sr-only">Ward</span>
+                  <span className="sr-only">{t("Ward")}</span>
                   <select value={ward} onChange={(e) => setWard(e.target.value)}>
-                    {wards.map((w) => <option key={w} value={w}>PCMC ward {w}{zone(w) ? `, zone ${zone(w)}` : ""}</option>)}
+                    {wards.map((w) => <option key={w} value={w}>{t2("PCMC ward {w}", { w })}{zone(w) ? t2(", zone {z}", { z: zone(w)! }) : ""}</option>)}
                   </select>
                 </label>
                 <button className="btn no-print print-btn" onClick={() => print()}>{t("Print this list")}</button>
@@ -49,15 +49,15 @@ export default function Officer() {
                 <h2 className="ledger-h">{t2(first.length === 1 ? "Check first: {n} project" : "Check first: {n} projects", { n: first.length })}</h2>
                 {first.length === 0 ? <Empty title={t("No recommended projects found in this ward.")} /> : (
                   <table className="ledger" key={ward}>
-                    <caption className="sr-only">Who to check first in PCMC ward {ward}</caption>
+                    <caption className="sr-only">{t2("Who to check first in PCMC ward {w}", { w: ward })}</caption>
                     <thead><tr><th>#</th><th>{t("Project")}</th><th>{t("Wet waste a day")}</th><th>{t("Promised")}</th><th>{t("Recommended")}</th><th>{t("Source")}</th></tr></thead>
                     <tbody>
                       {first.map((p, i) => (
                         <tr key={p.id} className="fade-in" style={{ "--delay": `${i * 30}ms` } as CSSProperties}>
                           <td className="hand">{i + 1}</td>
-                          <td><Link to={`/p/${p.id}`}>{placeName(p)}</Link></td>
+                          <td><Link data-data to={`/p/${p.id}`}>{placeName(p)}</Link></td>
                           <td className="num">{kg(p.wet_kg_day)} kg</td>
-                          <td>{method(p.quote) || "on site"}</td>
+                          <td>{method(p.quote) || t("on site")}</td>
                           <td>{shortDate(p.meeting_date)}</td>
                           <td>{p.pdf && <a className="ink hand" href={`${p.pdf}#page=${p.page}`} target="_blank" rel="noreferrer">page {p.page}</a>}</td>
                         </tr>
@@ -71,7 +71,7 @@ export default function Officer() {
                 {review.map((p) => (
                   <Link key={p.id} to={`/p/${p.id}`} className="review-slip">
                     <Tick ok={false} play={false} />
-                    <span><b className="pencil">{kg(p.wet_kg_day)} kg as read by machine</b>, <b>{placeName(p)}</b>: {p.review_reason}</span>
+                    <span><b className="pencil">{kg(p.wet_kg_day)} kg, {t("as read by machine")}</b>, <b data-data>{placeName(p)}</b>: {t(p.review_reason || "")}</span>
                   </Link>
                 ))}
               </aside>

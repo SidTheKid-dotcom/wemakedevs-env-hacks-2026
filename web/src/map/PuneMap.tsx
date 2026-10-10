@@ -7,7 +7,7 @@ import { easeInOut, onFrame, reducedMotion } from "../motion";
 import { rng, smoothPath } from "../rough";
 import { InkPath } from "../ui/Ink";
 import map from "./pune.json";
-import { t, useLang } from "../i18n";
+import { t, t2, useLang } from "../i18n";
 
 const { minLon, maxLat, kx, scale } = map.projection;
 export const project = (lat: number, lon: number): [number, number] => [(lon - minLon) * kx * scale, (maxLat - lat) * scale];
@@ -29,7 +29,7 @@ export function PuneMap({ points, focus, radiusKm = 2, highlight, label = "Map o
   points: Summary[]; focus?: { lat: number; lon: number } | null; radiusKm?: number; highlight?: string | null; label?: string;
 }) {
   const nav = useNavigate();
-  useLang();
+  const lang = useLang();
   const box = useRef<HTMLDivElement>(null);
   const [vb, setVb] = useState(FULL);
   const [seen, setSeen] = useState(reducedMotion());
@@ -37,7 +37,7 @@ export function PuneMap({ points, focus, radiusKm = 2, highlight, label = "Map o
   const [tip, setTip] = useState<{ dot?: Summary; ward?: string; x: number; y: number; pinned?: boolean } | null>(null);
   const touch = useMemo(() => matchMedia("(hover: none)").matches, []);
   const at = (e: React.MouseEvent) => { const r = box.current!.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
-  const wards = useMemo(() => focus ? null : wardStats(points), [points, focus]); // ward totals only on the whole-city map
+  const wards = useMemo(() => focus ? null : wardStats(points), [points, focus, lang]); // names are translated, so recompute per language // ward totals only on the whole-city map
   const max = useMemo(() => Math.max(1, ...points.filter((p) => p.status !== "review").map((p) => p.wet_kg_day || 0)), [points]);
 
   useEffect(() => { // dots grow in the first time the map is on screen
@@ -214,11 +214,11 @@ function wardStats(points: Summary[]) {
   for (const p of points) byWard.set(`${p.city}|${p.ward}`, [...(byWard.get(`${p.city}|${p.ward}`) || []), p]);
   for (const w of map.pmc) { // "01 Dhanori - Vishrantwadi" -> "Ward 1, Dhanori – Vishrantwadi"
     const m = w.ward.match(/^0*(\d+)\s+(.*)$/);
-    out.set(`PMC|${w.ward}`, { name: m ? `Ward ${m[1]}, ${m[2].replace(/ - /g, " – ")}` : w.ward, kg: 0, city: "PMC", ward: w.ward });
+    out.set(`PMC|${w.ward}`, { name: m ? t2("Ward {n}, {place}", { n: m[1], place: m[2].replace(/ - /g, " – ") }) : w.ward, kg: 0, city: "PMC", ward: w.ward });
   }
   for (const w of map.pcmc) { // the older PCMC layout has numbers only: name it by its most common locality
     const around = commonLocality((byWard.get(`PCMC|${w.ward}`) || []).map((p) => p.village));
-    out.set(`PCMC|${w.ward}`, { name: `PCMC ward ${w.ward}${around ? `, around ${around}` : ""}`, kg: 0, city: "PCMC", ward: w.ward });
+    out.set(`PCMC|${w.ward}`, { name: around ? t2("PCMC ward {w}, around {place}", { w: w.ward, place: around }) : t2("PCMC ward {w}", { w: w.ward }), kg: 0, city: "PCMC", ward: w.ward });
   }
   for (const [key, ps] of byWard) {
     const st = out.get(key);
@@ -235,10 +235,10 @@ function Tip({ tip, wards, boxWidth }: { tip: { dot?: Summary; ward?: string; x:
     const where = localities(p.village).at(-1) || placeName(p);
     return (
       <span className={`label tip${tip.pinned ? " pinned" : ""}`} style={style}>
-        {p.wet_kg_day == null ? <b className="pencil">A person must check this</b>
-          : <b className={p.status === "review" ? "pencil" : ""}>{kg(p.wet_kg_day)} kg a day</b>}
-        <span>{[where, method(p.quote)?.match(/\((\w+)\)$/)?.[1] || method(p.quote)].filter(Boolean).join(", ")}</span>
-        {tip.pinned && <Link className="ink hand" to={`/p/${p.id}`}>Open the promise</Link>}
+        {p.wet_kg_day == null ? <b className="pencil">{t("A person must check this")}</b>
+          : <b className={p.status === "review" ? "pencil" : ""}>{kg(p.wet_kg_day)} {t("kg a day")}</b>}
+        <span data-data>{[where, method(p.quote)?.match(/\((\w+)\)$/)?.[1] || method(p.quote)].filter(Boolean).join(", ")}</span>
+        {tip.pinned && <Link className="ink hand" to={`/p/${p.id}`}>{t("Open the promise")}</Link>}
       </span>
     );
   }
@@ -247,8 +247,8 @@ function Tip({ tip, wards, boxWidth }: { tip: { dot?: Summary; ward?: string; x:
   return (
     <span className={`label tip${tip.pinned ? " pinned" : ""}`} style={style}>
       <b>{w.name}</b>
-      <span>{w.kg ? (w.kg >= 1000 ? `${tonnes(w.kg)} t` : `${kg(w.kg)} kg`) + " of wet waste a day promised" : "No counted promises in this ward"}</span>
-      {tip.pinned && w.city === "PCMC" && <Link className="ink hand" to={`/officer?ward=${w.ward}`}>Check-first list for this ward</Link>}
+      <span>{w.kg ? t2("{amount} of wet waste a day promised", { amount: w.kg >= 1000 ? `${tonnes(w.kg)} t` : `${kg(w.kg)} kg` }) : t("No counted promises in this ward")}</span>
+      {tip.pinned && w.city === "PCMC" && <Link className="ink hand" to={`/officer?ward=${w.ward}`}>{t("Check-first list for this ward")}</Link>}
     </span>
   );
 }

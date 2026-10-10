@@ -7,7 +7,7 @@ import { inkCircle } from "../map/PuneMap";
 import { arrow } from "../rough";
 import { InkPath, Stamp } from "./Ink";
 import { reducedMotion } from "../motion";
-import { t, useLang } from "../i18n";
+import { t, t2, useLang } from "../i18n";
 
 const PLACE = { title: "Seasons Mall, Hadapsar", lat: 18.5199, lon: 73.9313 }; // Amazon Location's point for this address
 const DEMO_ID = "sia-mh-mis-213829-2021"; // hand-checked: 1,056 kg a day, OWC, page 3, 540 m from Seasons Mall
@@ -145,10 +145,10 @@ function ResultsScene({ count, row, near }: { count: number; row: { p: Summary; 
     <div className="d-pad">
       <Mast />
       <div className="d-body">
-        <p className="d-h2 d-in" style={d(0.1)}>{count} promises within 2 km</p>
+        <p className="d-h2 d-in" style={d(0.1)}>{t2("{n} promises within {r} km", { n: count, r: 2 })}</p>
         <MiniMap near={near} pick={row.p} />
         <div className="d-row pick d-in" style={d(0.9)}>
-          <b>{kg(row.p.wet_kg_day)} kg a day</b>
+          <b>{kg(row.p.wet_kg_day)} {t("kg a day")}</b>
           <span>{placeName(row.p)}, {row.d.toFixed(1)} km</span>
           <Tap at={2.3} />
         </div>
@@ -175,13 +175,13 @@ function CardScene({ p }: { p: Summary }) {
   return (
     <div className="d-pad" ref={pad}>
       <Mast />
-      <p className="d-place">{placeName(p)}</p>
+      <p className="d-place" data-data>{placeName(p)}</p>
       <p className="d-big" ref={num}><span className="d-hl" style={d(0.5)} />{kg(p.wet_kg_day)} kg</p>
-      <p className="d-sub">of wet waste a day</p>
-      <p className="d-method">{/biogas/i.test(p.quote || "") ? "Processed" : "Composted"} on site: {short(method(p.quote))}</p>
+      <p className="d-sub">{t("of wet waste a day")}</p>
+      <p className="d-method">{t(/biogas/i.test(p.quote || "") ? "Processed on site:" : "Composted on site:")} {short(method(p.quote))}</p>
       <div className="d-clip d-in" style={d(0.9)} ref={clip}>
-        <span className="d-sub">Page {p.page}</span>
-        <span className="d-quote"><span className="d-hl" style={d(1.4)} />{p.quote}</span>
+        <span className="d-sub">{t2("Page {p}", { p: p.page ?? "" })}</span>
+        <span className="d-quote" data-data><span className="d-hl" style={d(1.4)} />{p.quote}</span>
       </div>
       {ink && <svg className="d-arrow" viewBox={`0 0 ${ink.w} ${ink.h}`}>
         <InkPath d={ink.body} color="var(--leaf)" width={2.2} delay={1800} dur={450} />
@@ -193,7 +193,7 @@ function CardScene({ p }: { p: Summary }) {
         <img className="sd next" src="/props/seedling-3.webp" alt="" />
         {["banana", "eggshell", "onion"].map((n, k) => <img key={n} className="d-peel" src={`/props/${n}.webp`} alt="" style={{ "--x": `${(k - 1) * 16}%`, ...d(2.0 + k * 0.28) } as CSSProperties} />)}
       </div>
-      <div className="d-btn d-cta">Ask for the plant to run<Tap at={3.8} /></div>
+      <div className="d-btn d-cta">{t("Ask for the plant to run")}<Tap at={3.8} /></div>
     </div>
   );
 }
@@ -203,22 +203,22 @@ function LetterScene({ p }: { p: Summary }) {
   return (
     <div className="d-pad">
       <Mast />
-      <p className="d-place">{placeName(p)}</p>
+      <p className="d-place" data-data>{placeName(p)}</p>
       <p className="d-big">{kg(p.wet_kg_day)} kg</p>
       <div className="d-sheet">
         <div className="d-choose d-out" style={d(2.1)}>
-          <div className="d-opt on">To: {builder}</div>
-          <div className="d-seg"><span className="on">English</span><span lang="mr">मराठी</span></div>
-          <div className="d-btn">Write my letter<Tap at={1.5} /></div>
+          <div className="d-opt on">{t("To:")} <span data-data>{builder}</span></div>
+          <div className="d-seg" data-data><span className="on">English</span><span lang="mr">मराठी</span><span lang="hi">हिंदी</span></div>
+          <div className="d-btn">{t("Write my letter")}<Tap at={1.5} /></div>
         </div>
         <div className="d-letter d-in" style={d(2.3)}>
           <div className="d-paper sent">
             <p>To: {builder}</p>
-            <p className="d-quote">“{p.quote}” (page {p.page})</p>
+            <p className="d-quote"><span data-data>“{p.quote}”</span> ({t2("page {p}", { p: p.page ?? "" })})</p>
             {[92, 80, 88, 70, 90, 76, 52].map((w, n) => <i key={n} className="d-line" style={{ width: `${w}%`, ...d(2.4 + n * 0.12) }} />)}
           </div>
-          <div className="d-bubble">“{p.quote}” (page {p.page})<span className="ticks">✓✓</span></div>
-          <div className="d-btn">Send on WhatsApp<Tap at={4.9} /></div>
+          <div className="d-bubble"><span data-data>“{p.quote}”</span> ({t2("page {p}", { p: p.page ?? "" })})<span className="ticks">✓✓</span></div>
+          <div className="d-btn">{t("Send on WhatsApp")}<Tap at={4.9} /></div>
         </div>
       </div>
     </div>
@@ -228,9 +228,9 @@ function LetterScene({ p }: { p: Summary }) {
 function OfficerScene({ rows }: { rows: Summary[] }) {
   return (
     <div className="d-pad">
-      <Mast><span className="d-navon">Ward officers</span></Mast>
+      <Mast><span className="d-navon">{t("Ward officers")}</span></Mast>
       <div className="d-body">
-        <p className="d-ward d-in" style={d(0.1)}>Ward {WARD}<span className="hand">check first</span></p>
+        <p className="d-ward d-in" style={d(0.1)}>{t2("Ward {w}", { w: WARD })}<span className="hand">{t("check first")}</span></p>
         {rows.map((p, n) => (
           <div key={p.id} className="d-led d-in" style={d(0.4 + n * 0.25)}>
             <span className="hand">{n + 1}</span>
@@ -239,7 +239,7 @@ function OfficerScene({ rows }: { rows: Summary[] }) {
           </div>
         ))}
       </div>
-      <div className="d-btn">Print this list<Tap at={2.7} /></div>
+      <div className="d-btn">{t("Print this list")}<Tap at={2.7} /></div>
       <span className="d-stamp"><Stamp lines={[t("Printed")]} shape="box" rotate={-10} delay={3000} /></span>
     </div>
   );

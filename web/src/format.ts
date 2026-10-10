@@ -1,23 +1,23 @@
 // Formatting and small pure helpers shared by every screen.
 import type { City, Summary } from "./api";
-import { t } from "./i18n";
+import { dateLocale, getLang, t, t2 } from "./i18n";
 
 const IN = new Intl.NumberFormat("en-IN");
 export const kg = (n: number | null | undefined) => (n == null ? "?" : IN.format(Math.round(n)));
 /** City totals in tonnes ("735.6"): "7,35,579 kg" reads wrong outside India. */
 export const tonnes = (kgPerDay: number) => (kgPerDay / 1000).toFixed(1);
 export const longDate = (iso: string) =>
-  new Date(iso + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  new Date(iso + "T00:00:00").toLocaleDateString(dateLocale(), { day: "numeric", month: "long", year: "numeric" });
 export const shortDate = (iso: string) =>
-  new Date(iso + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-export const cityName = (c: City) => (c === "PCMC" ? "Pimpri-Chinchwad (PCMC)" : "Pune (PMC)");
+  new Date(iso + "T00:00:00").toLocaleDateString(dateLocale(), { day: "numeric", month: getLang() === "en" ? "short" : "long", year: "numeric" }); // "अग॰" reads oddly; spell the month out
+export const cityName = (c: City) => t(c === "PCMC" ? "Pimpri-Chinchwad (PCMC)" : "Pune (PMC)");
 export const wardLabel = (p: Pick<Summary, "city" | "ward">) => (p.city === "PCMC" ? `ward ${p.ward}` : `ward ${p.ward}`);
 
 /** Readable project name: the model's name, else village, else a plain fallback. */
 export function placeName(p: Pick<Summary, "project_name" | "village">) {
   const name = (p.project_name || "").replace(/\s+/g, " ").trim();
   const generic = !name || name.length > 70 || /^(proposed|environment|amendment|expansion)/i.test(name);
-  if (generic) return p.village ? `Housing project, ${title(p.village)}` : "Housing project";
+  if (generic) return p.village ? t2("Housing project, {place}", { place: title(p.village) }) : t("Housing project");
   return p.village && !name.toLowerCase().includes(p.village.toLowerCase()) ? `${name}, ${title(p.village)}` : name;
 }
 /** A year of the promised waste, in tonnes: what stays out of the trucks if the plant runs. */
