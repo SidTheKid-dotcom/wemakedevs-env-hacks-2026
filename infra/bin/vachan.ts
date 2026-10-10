@@ -101,11 +101,14 @@ const guard = new bedrock.CfnGuardrail(stack, "LetterGuard", {
     wordsConfig: (JSON.parse(fs.readFileSync(path.join(__dirname, "../../pipeline/vachan/blocked_words.json"), "utf8")) as string[])
       .map((text) => ({ text })),
   },
+  // Guard the output, not the input. Nothing a caller sends reaches the model: letter.py
+  // builds the whole prompt from our own published record, and the id, recipient and
+  // language are allow-listed. PROMPT_ATTACK is left off because it reads our own
+  // instructions ("Write a short, polite letter…") as an injection and refused every draft.
   contentPolicyConfig: {
     filtersConfig: [
-      { type: "INSULTS", inputStrength: "HIGH", outputStrength: "HIGH" },
-      { type: "MISCONDUCT", inputStrength: "HIGH", outputStrength: "HIGH" },
-      { type: "PROMPT_ATTACK", inputStrength: "HIGH", outputStrength: "NONE" },
+      { type: "INSULTS", inputStrength: "NONE", outputStrength: "HIGH" },
+      { type: "MISCONDUCT", inputStrength: "NONE", outputStrength: "HIGH" },
     ],
   },
   sensitiveInformationPolicyConfig: { // the minutes may carry a stray phone number or e-mail
