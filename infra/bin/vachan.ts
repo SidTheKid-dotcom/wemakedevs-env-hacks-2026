@@ -35,15 +35,17 @@ const table = new dynamodb.TableV2(stack, "Extractions", {
 // One container image (Python + pdftotext) for every pipeline step.
 const image = (cmd: string) =>
   lambda.DockerImageCode.fromImageAsset(path.join(__dirname, "../../pipeline"), { cmd: [cmd] });
-const step = (id: string, cmd: string, timeoutMin: number, memoryMb: number) => {
+const step = (id: string, cmd: string, timeoutMin: number, memoryMb: number, pipelineAccess = true) => {
   const fn = new lambda.DockerImageFunction(stack, id, {
     code: image(cmd),
     timeout: cdk.Duration.minutes(timeoutMin),
     memorySize: memoryMb,
     environment: { BUCKET: bucket.bucketName, TABLE: table.tableName, CDN_URL: `https://${cdn.distributionDomainName}` },
   });
-  bucket.grantReadWrite(fn);
-  table.grantReadWriteData(fn);
+  if (pipelineAccess) { // the nightly steps write the data; the public letter handler must not
+    bucket.grantReadWrite(fn);
+    table.grantReadWriteData(fn);
+  }
   return fn;
 };
 const crawl = step("Crawl", "vachan.crawl.handler", 15, 1024);
@@ -54,6 +56,8 @@ readPdf.addToRolePolicy(new iam.PolicyStatement({
   actions: ["bedrock:InvokeModel"],
   resources: ["arn:aws:bedrock:*::foundation-model/*", `arn:aws:bedrock:*:${stack.account}:inference-profile/*`],
 }));
+
+const LETTER_MODEL = "apac.amazon.nova-pro-v1:0"; // must match letter.py's LETTER_MODEL_ID default
 
 // Pipeline: crawl -> read every new PDF in parallel -> publish.
 const readEach = new sfn.DistributedMap(stack, "ReadEachMinutes", {
@@ -79,11 +83,19 @@ new events.Rule(stack, "Nightly", {
 });
 
 // Public letter drafting: no login, so it is capped (2 at a time, DAILY_CAP a day).
-const letter = step("Letter", "vachan.letter.handler", 1, 512);
+// This handler is the only thing open to the internet, so it gets only what it uses:
+// one published record to read, one counter to add to, one model to call.
+const letter = step("Letter", "vachan.letter.handler", 1, 512, false);
 letter.addEnvironment("DAILY_CAP", "1500"); // about $0.003 a letter: the worst case is about $4.50 a day
+bucket.grantRead(letter, "data/p/*");
+letter.addToRolePolicy(new iam.PolicyStatement({
+  actions: ["dynamodb:UpdateItem"], // the "_letters" daily counter, nothing else
+  resources: [table.tableArn],
+}));
 letter.addToRolePolicy(new iam.PolicyStatement({
   actions: ["bedrock:InvokeModel"],
-  resources: ["arn:aws:bedrock:*::foundation-model/*", `arn:aws:bedrock:*:${stack.account}:inference-profile/*`],
+  resources: [`arn:aws:bedrock:*:${stack.account}:inference-profile/${LETTER_MODEL}`,
+              `arn:aws:bedrock:*::foundation-model/${LETTER_MODEL.replace(/^apac\./, "")}`],
 }));
 (letter.node.defaultChild as lambda.CfnFunction).reservedConcurrentExecutions = 2;
 const letterUrl = letter.addFunctionUrl({

@@ -17,11 +17,13 @@
 | Flat buyer or renter | "What am I signing up for?" | The written promise and one plain question to ask the builder |
 | PCMC ward officer | "Whom do I check first this week?" | A list ranked by promised wet waste, never a verdict, plus a review queue |
 
-## Proof numbers (last run)
-- **1,026** SEAC minutes PDFs read; **1,209** Pune project sites (PMC + PCMC).
-- **734.8 t of wet waste a day** promised in writing (PMC 420.5, PCMC 314.3), counting only projects the committee recommended and that passed every check.
-- **826 of 826** published quotes re-checked against the live government PDF after the run.
-- **383** records wait for a person to check them. The site says so on each one.
+## Proof numbers (run of 10 Oct 2026, 04:20 UTC)
+- **1,027** SEAC minutes PDFs read; **1,214** Pune project sites (PMC + PCMC).
+- **735.6 t of wet waste a day** promised in writing (PMC 421.8, PCMC 313.7), counting only the **783** projects the committee recommended and that passed every check. **776** of those promise on-site processing.
+- **829 of 829** published quotes re-checked against the live government PDF after the run.
+- **385** records wait for a person to check them. The site says so on each one.
+
+Every number here comes from [`stats.json`](https://d18hjofgs77fd1.cloudfront.net/data/stats.json), which the nightly run publishes and CI checks on every push.
 
 ## How we used AWS
 | Service | Job | Why this service | In the video |
