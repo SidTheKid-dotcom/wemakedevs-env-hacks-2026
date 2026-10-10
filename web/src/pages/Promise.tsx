@@ -34,18 +34,20 @@ export default function PromisePage() {
 /** Shrinks the big number only when "18,758 kg" would not fit the card, so 3 digits and 7 digits both sit on one line. */
 function useFitWidth(ref: React.RefObject<HTMLElement | null>) {
   useLayoutEffect(() => {
-    const el = ref.current, host = el?.closest(".card") as HTMLElement | null;
-    if (!el || !host) return;
+    const el = ref.current, card = el?.closest(".card") as HTMLElement | null;
+    if (!el || !card) return;
+    // on phones the left column is display: contents (no box), so the card itself is the measure
+    const host = () => { const col = el.closest(".card-left") as HTMLElement | null; return col && col.clientWidth > 0 ? col : card; };
     const fit = () => {
       el.style.fontSize = ""; // back to the stylesheet size, then measure
-      const avail = host.clientWidth, w = el.scrollWidth;
+      const avail = host().clientWidth, w = el.scrollWidth;
       // 0.84 leaves room for the green highlight and the ink burst, which reach past the digits
       if (w > avail * 0.84) el.style.fontSize = `${(parseFloat(getComputedStyle(el).fontSize) * avail * 0.84) / w}px`;
     };
     fit();
     const late = setTimeout(fit, 650); // after the count-up reaches its widest value
     const ro = new ResizeObserver(fit);
-    ro.observe(host);
+    ro.observe(card);
     document.fonts?.ready.then(fit);
     return () => { clearTimeout(late); ro.disconnect(); };
   }, [ref]);
@@ -172,7 +174,7 @@ function Card({ p }: { p: Project }) {
         {p.tenements && <div><dt>{t("Flats:")}</dt><dd className="label">{p.tenements}</dd></div>}
         <div><dt>{p.decision === "recommended" ? t("Recommended for clearance:") : t("Committee meeting:")}</dt><dd className="label">{longDate(p.meeting_date)}</dd></div>
         <div><dt>{t("Proposal:")}</dt><dd className="label">{p.proposal_id.replace("SIA/MH/", "")}</dd></div>
-        {builder && <Link className="ink hand" to={`/b/${builderSlug(builder)}`}>{tl("Other projects by {builder}", { builder: <span data-data>{builder}</span> })}</Link>}
+        {builder && <Link className="ink hand" to={`/b/${builderSlug(builder)}`}><span>{tl("Other projects by {builder}", { builder: <span data-data>{builder}</span> })}</span></Link>}
       </dl>
       <p className="about sub">{t("VACHAN reads Pune's public environmental-clearance minutes and shows what each builder promised to do with wet waste.")} {t("A promise is not proof that a plant was built or runs.")} <Link className="ink hand" to="/">{t("Search another building")}</Link></p>
       <p className="fixit sub">

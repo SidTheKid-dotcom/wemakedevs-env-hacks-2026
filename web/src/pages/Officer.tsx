@@ -59,7 +59,7 @@ export default function Officer() {
                           <td className="num">{kg(p.wet_kg_day)} kg</td>
                           <td>{method(p.quote) || t("on site")}</td>
                           <td>{shortDate(p.meeting_date)}</td>
-                          <td>{p.pdf && <a className="ink hand" href={`${p.pdf}#page=${p.page}`} target="_blank" rel="noreferrer">page {p.page}</a>}</td>
+                          <td>{p.pdf && <a className="ink hand" href={`${p.pdf}#page=${p.page}`} target="_blank" rel="noreferrer">{t2("page {p}", { p: p.page ?? "" })}</a>}</td>
                         </tr>
                       ))}
                     </tbody>

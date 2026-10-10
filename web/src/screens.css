@@ -37,8 +37,8 @@
 .actions .btn { flex: 1 1 140px; }
 .cta-note { flex: 1 1 100%; font-size: 14px; }
 .share-btn svg { display: none; }
-@media (max-width: 1023px) { .card .share-btn svg { display: block; } }
-.card .actions .btn { flex: 1 1 auto; white-space: nowrap; }
+@media (max-width: 1023px) { .card-left .share-btn svg { display: block; } }
+.card-left > .actions .btn { flex: 1 1 auto; white-space: nowrap; }
 /* what changes if the plant runs: the point of the whole card */
 .outcome { max-width: 44ch; font-size: 17px; line-height: 1.45; border-left: 3px solid var(--leaf); padding-left: 12px; }
 .outcome b { color: var(--leaf); white-space: nowrap; }
@@ -78,7 +78,8 @@
 .hl svg.sweep { transform: scaleX(0); animation: sweep var(--dur) var(--ease-out) var(--delay) forwards; }
 @keyframes sweep { 0% { transform: scaleX(0); } 85% { transform: scaleX(1.02); } 100% { transform: scaleX(1); } }
 .hl-text { position: relative; z-index: 1; font-weight: 700; }
-.annotate { position: absolute; right: -6px; top: -26px; font-size: 14px; line-height: 1.25; transform: rotate(2deg); }
+/* the margin note sits under the clipping at every width: floating, it met the tape */
+.annotate { position: static; display: inline-block; justify-self: start; margin-top: 10px; font-size: 14px; line-height: 1.25; transform: rotate(1deg); }
 .card-stamp { position: absolute; right: -4px; top: 150px; z-index: 5; pointer-events: none; }
 .stamp { position: relative; display: grid; place-items: center; width: 128px; height: 128px; transform: rotate(var(--rot)); opacity: .82; }
 .stamp.box { width: 200px; height: 110px; }
@@ -99,13 +100,16 @@
   .card { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); column-gap: 80px; }
   .card-right { border-left: 1px dashed #4d473e66; padding-left: 40px; }
   .card-right .clipping { padding: 30px 30px 24px; }
-  .annotate { right: 40px; top: -30px; }
   .facts, .about { grid-column: 1 / -1; }
   .per-day { font-size: 56px; }
   .promised { font-size: 22px; }
   .quote { font-size: 19px; }
   .card-stamp { right: -36px; top: 130px; }
   .stamp { width: 150px; height: 150px; }
+}
+/* a narrow desktop column cannot share its width with the stamp: give it its own row */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .card-stamp { position: relative; top: 0; right: 0; justify-self: end; margin: -8px 4px -4px 0; }
 }
 @media (max-width: 1023px) {
   .card-left { display: contents; }
@@ -116,20 +120,18 @@
   /* added later: without an order they jumped above the place name on phones */
   .card .outcome { order: 6; } .card .fixit { order: 13; }
   /* the sticky bar runs to the paper's edges with a soft top edge, so the page slides under it cleanly */
-  .card .actions { order: 11; position: sticky; bottom: 0; z-index: 6; margin-inline: calc(-1 * var(--pad)); padding: 12px var(--pad) 10px;
+  .card-left > .actions { order: 11; position: sticky; bottom: 0; z-index: 6; margin-inline: calc(-1 * var(--pad)); padding: 12px var(--pad) 10px;
     background: var(--paper) var(--paper-tex); background-size: 384px; box-shadow: 0 -1px 0 #1d1c1a1f; }
-  .card .actions::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 22px; pointer-events: none;
+  .card-left > .actions::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 22px; pointer-events: none;
     background: linear-gradient(to bottom, color-mix(in srgb, var(--paper) 0%, transparent), var(--paper)); }
-  /* the margin note sits under the clipping instead of floating over its caption */
-  .annotate { position: static; transform: none; display: inline-block; justify-self: start; margin-top: 10px; }
   .card-stamp { display: none; }
   .card.review .card-stamp { display: block; position: relative; top: 0; right: 0; justify-self: center; margin: 4px 0 8px; }
   .big.pencil { font-size: 72px; white-space: nowrap; }
   .actions .btn { padding: 0 14px; font-size: 18px; white-space: nowrap; }
-  .card .actions .btn:first-child { flex: 1 1 0; }
-  .card .actions .share-btn { flex: 0 0 52px; padding: 0; }
-  .card .share-btn .lbl { display: none; }
-  .card .cta-note { font-size: 13px; }
+  .card-left > .actions .btn:first-child { flex: 1 1 0; }
+  .card-left > .actions .share-btn { flex: 0 0 52px; padding: 0; }
+  .card-left .share-btn .lbl { display: none; }
+  .card-left .cta-note { font-size: 13px; }
   .quote-arrow { display: none; }
 }
 
@@ -242,7 +244,7 @@
 .pin { filter: drop-shadow(0 2px 1px #0005); }
 /* the legend sits under the map at every width, never on top of the dots */
 .legend { margin-top: 10px; font-size: 15px; line-height: 1.6; text-align: left; }
-.map-hint { position: absolute; left: 10px; top: 10px; z-index: 3; margin: 0; padding: 2px 8px; font-size: 15px; color: var(--ink-soft); background: color-mix(in srgb, var(--paper) 85%, transparent); border-radius: 3px; pointer-events: none; }
+.map-hint { position: absolute; left: 10px; top: 10px; z-index: 3; max-width: calc(100% - 76px); margin: 0; padding: 2px 8px; /* never reaches the zoom keys */ font-size: 15px; color: var(--ink-soft); background: color-mix(in srgb, var(--paper) 85%, transparent); border-radius: 3px; pointer-events: none; }
 .lg-dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: var(--leaf); vertical-align: middle; margin-right: 6px; }
 .lg-dot.hollow { background: none; border: 1.5px dashed var(--ink-soft); }
 .tip { position: absolute; z-index: 20; display: grid; gap: 2px; max-width: 250px; pointer-events: none; font-size: 14px; line-height: 1.3; }
@@ -360,7 +362,7 @@
 .officer h1 { font-size: 30px; margin-bottom: 8px; }
 .officer-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
 .ledger { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 16px; }
-.ledger th { text-align: left; font-weight: 400; color: var(--ink-soft); border-bottom: 1.5px solid var(--ink); padding: 8px 10px; background: var(--paper); position: sticky; top: 0; }
+.ledger th { text-align: left; font-weight: 400; color: var(--ink-soft); border-bottom: 1.5px solid var(--ink); padding: 8px 10px; background: var(--paper) var(--paper-tex); background-size: 384px; position: sticky; top: 0; z-index: 3; } /* above the rows, whose fade-in gives each its own layer */
 .ledger td { padding: 12px 10px; border-bottom: 1px solid #1d1c1a40; vertical-align: top; }
 .ledger td.num { font: 800 20px var(--display); white-space: nowrap; }
 .ledger a { color: var(--ink); }
@@ -372,8 +374,9 @@
 .review-slip:nth-child(odd) { transform: rotate(.5deg); }
 .review-slip svg { flex: 0 0 24px; height: 24px; }
 .review-slip .pencil { font-family: var(--hand); font-weight: 400; color: var(--ink-soft); }
-@media (min-width: 1024px) {
-  .officer h1 { font-size: 44px; }
+@media (min-width: 1024px) { .officer h1 { font-size: 44px; } }
+/* the review queue sits beside the table only once the table has room; below that it follows the table */
+@media (min-width: 1280px) {
   .officer-cols { grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); }
   .review-queue { border-left: 1px solid #1d1c1a40; padding-left: 28px; }
 }
@@ -534,7 +537,7 @@
 .d-bar { position: absolute; left: 44px; right: 0; bottom: 2px; height: 3px; background: var(--tape); transform: scaleX(0); transform-origin: left; animation: dSweep var(--ms) linear forwards; }
 .demo-note { font-size: 15px; color: var(--ink-soft); text-align: center; }
 @media (max-width: 359px) { .phone { width: 272px; height: 560px; } .d-h1 { font-size: 20px; } }
-@media (max-width: 359px) { .card .actions .btn { font-size: 16px; padding: 0 8px; } }
+@media (max-width: 359px) { .card-left > .actions .btn { font-size: 16px; padding: 0 8px; } }
 @media (min-width: 1024px) and (max-width: 1279px) { .headline { font-size: 44px; } }
 
 /* scene 1: the keyboard slides up on the tap, keys light as the address types, it slides away on the suggestion */

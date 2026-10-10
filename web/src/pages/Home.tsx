@@ -79,7 +79,7 @@ export default function Home() {
       <section className="atlas">
         <div className="atlas-text">
           <h2>{t("Every dot is a written promise")}</h2>
-          <p>{s ? t2("{n} housing project sites in Pune (PMC) and Pimpri-Chinchwad (PCMC). A bigger dot means more wet waste promised. A hollow dot means a person must check it.", { n: s.projects }) : t("Housing project sites in Pune (PMC) and Pimpri-Chinchwad (PCMC). A bigger dot means more wet waste promised. A hollow dot means a person must check it.")}</p>
+          <p>{s ? t2("{n} housing project sites in Pune (PMC) and Pimpri-Chinchwad (PCMC). A bigger dot means more wet waste promised. A hollow dot means a person must check it.", { n: kg(s.projects) }) : t("Housing project sites in Pune (PMC) and Pimpri-Chinchwad (PCMC). A bigger dot means more wet waste promised. A hollow dot means a person must check it.")}</p>
           <Link className="ink hand" to="/how">{t("How we find and check each promise")}</Link>
         </div>
         <div className="atlas-map">

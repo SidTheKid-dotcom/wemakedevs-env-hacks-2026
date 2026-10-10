@@ -66,7 +66,7 @@ export default function How() {
           {CHAIN.map((c) => <li key={c.k}><span className="hand cue">{t(c.k)}</span><span>{t(c.t)}</span></li>)}
         </ol>
         <p className="label fresh">
-          {t("Source: SEAC minutes on PARIVESH.")}{s && <> {t2("Newest meeting {date}.", { date: longDate(s.newest_meeting_date) })} {t2("Published {when}.", { when: new Date(s.published_at).toLocaleString(dateLocale(), { dateStyle: "medium", timeStyle: "short" }) })}</>}
+          {t("Source: SEAC minutes on PARIVESH.")}{s && <> {t2("Newest meeting {date}.", { date: longDate(s.newest_meeting_date) })} {t2("Published {when}.", { when: new Date(s.published_at).toLocaleString(dateLocale(), { dateStyle: "long", timeStyle: "short", hour12: false }) })}</>}
         </p>
         <div className="how-cols">
           <section id="data">

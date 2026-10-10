@@ -45,11 +45,17 @@ export const getProject = (id: string) => json<Project>(`${DATA}/data/p/${encode
 export const pdfUrl = (p: Project) => `${p.source.mirror_url}#page=${p.source.page}`;
 
 export async function draftLetter(id: string, to: "builder" | "pcmc" | "pmc", lang: "en" | "mr" | "hi") {
-  const r = await json<{ text?: string; error?: string }>(API, {
-    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id, to, lang }),
-  });
-  if (!r.text) throw new Error(r.error || "no letter");
-  return r.text;
+  // The drafter runs at most two letters at once (a cost cap), so a third person in the same
+  // seconds gets a 429. A draft takes ~2.5 s, so wait and try again rather than show an error.
+  // The daily cap is also a 429, but it says so in its body and is a real stop.
+  for (let attempt = 0; ; attempt++) {
+    const r = await fetch(API, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id, to, lang }) });
+    const body = await r.json().catch(() => ({} as { text?: string; error?: string })) as { text?: string; error?: string };
+    const busy = r.status === 429 && !/daily/i.test(body.error || "");
+    if (busy && attempt < 5) { await new Promise((res) => setTimeout(res, 1200 + attempt * 900 + Math.random() * 600)); continue; }
+    if (!r.ok || !body.text) throw new Error(body.error || `${r.status}`);
+    return body.text;
+  }
 }
 
 export const placesEnabled = Boolean(PLACES_KEY);
