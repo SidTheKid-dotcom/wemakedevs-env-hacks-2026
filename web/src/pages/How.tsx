@@ -85,8 +85,8 @@ export default function How() {
           <section id="credits">
             <h2>Credits</h2>
             <ul className="plain">
-              <li>Minutes: <a className="ink" href="https://parivesh.nic.in/" target="_blank" rel="noreferrer">PARIVESH</a>, Ministry of Environment, Forest and Climate Change</li>
-              <li>Ward maps: <a className="ink" href="https://github.com/datameet/Municipal_Spatial_Data" target="_blank" rel="noreferrer">DataMeet</a>, <a className="ink" href="https://creativecommons.org/licenses/by-sa/2.5/in/" target="_blank" rel="noreferrer">CC BY-SA 2.5 IN</a></li>
+              <li>Minutes: <a className="ink hand" href="https://parivesh.nic.in/" target="_blank" rel="noreferrer">PARIVESH</a>, Ministry of Environment, Forest and Climate Change</li>
+              <li>Ward maps: <a className="ink hand" href="https://github.com/datameet/Municipal_Spatial_Data" target="_blank" rel="noreferrer">DataMeet</a>, <a className="ink hand" href="https://creativecommons.org/licenses/by-sa/2.5/in/" target="_blank" rel="noreferrer">CC BY-SA 2.5 IN</a></li>
               <li>Address search: Amazon Location Service</li>
               <li>Desk props: modelled and rendered in Blender by the team</li>
               <li>AI tools: Claude Code, ChatGPT images (design concepts), Amazon Bedrock (reading the minutes and drafting letters)</li>

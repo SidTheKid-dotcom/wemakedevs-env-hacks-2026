@@ -124,8 +124,8 @@ function Card({ p }: { p: Project }) {
               : p.decision === "recommended" && <Stamp lines={["Recommended", "for clearance", longDate(p.meeting_date)]} delay={1200 * t} play={play} />}
         </span>
         <div className="links">
-          <a className="ink" href={pdfUrl(p)} target="_blank" rel="noreferrer">{review ? "Open the page and check it yourself" : `Open page ${p.source.page}`}</a>
-          <a className="ink" href={p.source.parivesh_url} target="_blank" rel="noreferrer">Original on PARIVESH</a>
+          <a className="ink hand" href={pdfUrl(p)} target="_blank" rel="noreferrer">{review ? "Open the page and check it yourself" : `Open page ${p.source.page}`}</a>
+          <a className="ink hand" href={p.source.parivesh_url} target="_blank" rel="noreferrer">Original on PARIVESH</a>
         </div>
         <ul className="checks" aria-label="Checks">
           {p.checks.map((c, i) => (
@@ -144,9 +144,9 @@ function Card({ p }: { p: Project }) {
         {p.tenements && <div><dt>Flats:</dt><dd className="label">{p.tenements}</dd></div>}
         <div><dt>{p.decision === "recommended" ? "Recommended for clearance:" : "Committee meeting:"}</dt><dd className="label">{longDate(p.meeting_date)}</dd></div>
         <div><dt>Proposal:</dt><dd className="label">{p.proposal_id.replace("SIA/MH/", "")}</dd></div>
-        {builder && <Link className="ink" to={`/b/${builderSlug(builder)}`}>Other projects by {builder}</Link>}
+        {builder && <Link className="ink hand" to={`/b/${builderSlug(builder)}`}>Other projects by {builder}</Link>}
       </dl>
-      <p className="about sub">VACHAN reads Pune's public environmental-clearance minutes and shows what each builder promised to do with wet waste. A promise is not proof that a plant was built or runs. <Link className="ink" to="/">Search another building</Link></p>
+      <p className="about sub">VACHAN reads Pune's public environmental-clearance minutes and shows what each builder promised to do with wet waste. A promise is not proof that a plant was built or runs. <Link className="ink hand" to="/">Search another building</Link></p>
 
       {!review && <QuoteArrow play={play} />}
       {sheet === "letter" && <LetterSheet p={p} onClose={() => setSheet(null)} />}

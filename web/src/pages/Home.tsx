@@ -1,4 +1,4 @@
-// Home: what VACHAN is and what to do, in one screen; then problem to impact, who it is for, the map, the story.
+// Home: what VACHAN is and what to do, in one screen; then problem to impact, who it is for, the map, one closing search.
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { getProjects, getStats, suggestPlaces, type Stats, type Summary } from "../api";
@@ -9,7 +9,6 @@ import { Desk } from "../ui/Desk";
 import { PhoneDemo } from "../ui/PhoneDemo";
 import { Empty, ErrorState, Masthead } from "../ui/Parts";
 import { goToPlace, matchProjects, SearchTape } from "./Search";
-import { Story } from "./Story";
 
 const EXAMPLES: { label: string; q?: string; place?: string }[] = [
   { label: "Punawale", q: "Punawale" }, { label: "Hadapsar", q: "Hadapsar" }, { label: "Seasons Mall", place: "Seasons Mall, Hadapsar, Pune" },
@@ -64,7 +63,7 @@ export default function Home() {
           <p className="hand try">try {EXAMPLES.map((e, i) => <span key={e.label}>
             <button className="ink hand linkish" onClick={() => example(e)}>{e.label}</button>{i < EXAMPLES.length - 2 ? ", " : i === EXAMPLES.length - 2 ? " or " : ""}
           </span>)}</p>
-          <p className="away">Not from Pune? <Link className="ink" to={`/p/${EXAMPLE_ID}`}>See a real promise</Link></p>
+          <p className="away">Not from Pune? <Link className="ink hand" to={`/p/${EXAMPLE_ID}`}>See a real promise</Link></p>
         </div>
         <div className="hero-demo"><PhoneDemo projects={projects.data} /></div>
       </section>
@@ -79,7 +78,7 @@ export default function Home() {
           <h2>Every dot is a written promise</h2>
           <p>{s ? `${s.projects} housing project sites` : "Housing project sites"} in Pune (PMC) and Pimpri-Chinchwad (PCMC). A bigger dot means more wet waste promised. A hollow dot means a person must check it.</p>
           {s?.quotes_verified != null && <p className="label proof">{s.quotes_verified} of {s.quotes_checked} quotes re-checked against the live government PDF after the last run, {shortDate(s.published_at.slice(0, 10))}.</p>}
-          <Link className="ink" to="/how">How we find and check each promise</Link>
+          <Link className="ink hand" to="/how">How we find and check each promise</Link>
         </div>
         <div className="atlas-map">
           {projects.data ? <PuneMap points={projects.data} focus={null} />
@@ -88,9 +87,13 @@ export default function Home() {
         </div>
       </section>
 
-      <Story total={s?.wet_kg_day_total} />
+      <section className="closing">
+        <h2>Is your society's plant running?</h2>
+        <p className="lede">Find what your builder promised in writing, and the page it is on.</p>
+        <SearchTape cta="Find the promise" />
+      </section>
       <footer className="foot-note sub">
-        Source: SEAC minutes on PARIVESH{s && `, newest meeting ${shortDate(s.newest_meeting_date)}`}. A promise is not proof that a plant was built or runs. <Link className="ink" to="/how">How it works</Link>
+        Source: SEAC minutes on PARIVESH{s && `, newest meeting ${shortDate(s.newest_meeting_date)}`}. A promise is not proof that a plant was built or runs. <Link className="ink hand" to="/how">How it works</Link>
       </footer>
     </Desk>
   );
@@ -105,8 +108,8 @@ function Chain({ s }: { s?: Stats }) {
         <li className="link problem">
           <span className="hand cue">The problem</span>
           <p className="fig">300 t</p>
-          <p>of wet waste a day goes from Pune's housing societies and malls to city plants, says <a className="ink" href={PMC_SOURCE} target="_blank" rel="noreferrer">PMC</a>.</p>
-          <p className="sub">In Pimpri-Chinchwad, <a className="ink" href={PCMC_SOURCE} target="_blank" rel="noreferrer">notices</a> set fines for large societies that don't process their own.</p>
+          <p>of wet waste a day goes from Pune's housing societies and malls to city plants, says <a className="ink hand" href={PMC_SOURCE} target="_blank" rel="noreferrer">PMC</a>.</p>
+          <p className="sub">In Pimpri-Chinchwad, <a className="ink hand" href={PCMC_SOURCE} target="_blank" rel="noreferrer">notices</a> set fines for large societies that don't process their own.</p>
         </li>
         <li className="link">
           <span className="hand cue">The solution</span>
@@ -129,7 +132,7 @@ function Chain({ s }: { s?: Stats }) {
         <li className="link impact">
           <span className="hand cue">The impact</span>
           <p className="fig">{s ? `${tonnes(s.wet_kg_day_total)} t` : "…"}</p>
-          <p>of wet waste a day, promised in writing to be processed on site across Pune. Every plant that runs keeps that waste where it is made, off the trucks to Moshi and Hadapsar.</p>
+          <p>of wet waste a day, promised in writing to be processed on site across Pune. Every plant that runs keeps that waste where it is made, instead of on trucks to the city's dumping grounds and waste plants.</p>
         </li>
       </ol>
     </section>
@@ -156,7 +159,7 @@ function Paths() {
         <ul className="ticks-list">
           <li>A list for your ward, biggest written promises first</li>
           <li>Each row links to its page in the minutes</li>
-          <li>Print it for field visits. It plans visits; it is not a verdict.</li>
+          <li>Print it for field visits.</li>
         </ul>
         <Link className="btn ghost" to="/officer">Open the ward list</Link>
       </div>

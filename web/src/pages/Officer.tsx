@@ -30,7 +30,7 @@ export default function Officer() {
             <header className="officer-head">
               <p className="kicker hand">For PCMC ward officers planning visits to large societies</p>
               <h1>Ward {ward}: which projects to check first</h1>
-              <p className="sub">The biggest wet-waste promises in this ward, from their clearance minutes. Ranked by kg a day, then by age. A list to plan visits, not a verdict.</p>
+              <p className="sub">Projects in this ward that promised to process the most wet waste on site, largest first. Use it to choose where to visit first. Being on this list does not mean anything is wrong.</p>
               <div className="ward-pick">
                 <label className="label select" key={ward}>
                   <span className="sr-only">Ward</span>
@@ -56,7 +56,7 @@ export default function Officer() {
                           <td className="num">{kg(p.wet_kg_day)} kg</td>
                           <td>{method(p.quote) || "on site"}</td>
                           <td>{shortDate(p.meeting_date)}</td>
-                          <td>{p.pdf && <a className="ink" href={`${p.pdf}#page=${p.page}`} target="_blank" rel="noreferrer">page {p.page}</a>}</td>
+                          <td>{p.pdf && <a className="ink hand" href={`${p.pdf}#page=${p.page}`} target="_blank" rel="noreferrer">page {p.page}</a>}</td>
                         </tr>
                       ))}
                     </tbody>

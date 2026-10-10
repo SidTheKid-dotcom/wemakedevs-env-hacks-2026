@@ -86,6 +86,9 @@ p { margin: 0; }
 .ink[aria-current="page"]::after { height: 3px; }
 @keyframes redraw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .ink.hand { font: 400 18px/1.2 var(--hand); }
+/* handwritten links: a real text underline, so it sits under every line, inline or in a 44 px tap target */
+.ink.hand { text-decoration: underline 2px; text-underline-offset: 5px; }
+.ink.hand::after { content: none; }
 
 /* nav letter roll (oryzo-style): each letter doubled in a one-line mask */
 .roll { display: inline-flex; overflow: hidden; height: 1.3em; line-height: 1.3em; }

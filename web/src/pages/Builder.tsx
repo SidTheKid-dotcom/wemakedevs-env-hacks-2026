@@ -41,7 +41,7 @@ export default function Builder() {
                     <Link className="entry-name" to={`/p/${p.id}`}>{placeName(p)}</Link>
                     <span className="sub">{p.decision === "recommended" ? "Recommended" : "Committee meeting"} {longDate(p.meeting_date)}</span>
                     <span className="sub">{[method(p.quote), p.status === "review" ? "a person must check this figure" : null].filter(Boolean).join(", ")}</span>
-                    {p.page && <a className="ink" href={`${p.pdf}#page=${p.page}`} target="_blank" rel="noreferrer">page {p.page}</a>}
+                    {p.page && <a className="ink hand" href={`${p.pdf}#page=${p.page}`} target="_blank" rel="noreferrer">page {p.page}</a>}
                   </li>
                 ))}
               </ul>
