@@ -39,7 +39,12 @@ def minutes_index() -> list[dict]:
             path = r["pdfFilePath"]
             docs.append({"meeting_id": str(r["meeting_id"]), "date": r["meeting_start_date"][:10],
                          "url": path if path.startswith("http") else "https://parivesh.nic.in" + path})
-    for r in json.loads(_get(V1_INDEX)):
+    try:  # the old portal is a frozen backfill (already in index/minutes.json); its outages must not stop a run
+        v1 = json.loads(_get(V1_INDEX))
+    except Exception as e:
+        print("v1 index unavailable", repr(e)[:200])
+        v1 = []
+    for r in v1:
         url = (r.get("MoM_URL") or "").replace("http://", "https://")
         if "aharash" in (r.get("state_name") or "") and r.get("SEIAA_SEAC") == "SEAC3" and url.lower().endswith(".pdf"):
             docs.append({"meeting_id": str(r["meeting_id"]), "date": (r.get("from_date") or "")[:10], "url": url})

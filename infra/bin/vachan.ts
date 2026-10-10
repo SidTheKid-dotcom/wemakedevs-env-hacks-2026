@@ -67,6 +67,7 @@ readEach.itemProcessor(new tasks.LambdaInvoke(stack, "ReadMinutes", { lambdaFunc
 const pipeline = new sfn.StateMachine(stack, "Pipeline", {
   definitionBody: sfn.DefinitionBody.fromChainable(
     new tasks.LambdaInvoke(stack, "CrawlParivesh", { lambdaFunction: crawl, payloadResponseOnly: true, resultPath: "$.crawl" })
+      .addRetry({ errors: ["States.ALL"], maxAttempts: 2, backoffRate: 3, interval: cdk.Duration.minutes(2) }) // PARIVESH has brief 500s
       .next(readEach)
       .next(new tasks.LambdaInvoke(stack, "PublishJson", { lambdaFunction: publish, payloadResponseOnly: true }))
       .next(new tasks.LambdaInvoke(stack, "ProveQuotes", { lambdaFunction: proof, payloadResponseOnly: true }))),
