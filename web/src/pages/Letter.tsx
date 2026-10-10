@@ -14,7 +14,7 @@ export function LetterSheet({ p, onClose }: { p: Project; onClose: () => void })
   const office = p.city === "PCMC" ? "pcmc" : "pmc";
   const saved = (() => { try { return JSON.parse(sessionStorage.getItem("letter") || "{}"); } catch { return {}; } })();
   const [to, setTo] = useState<"builder" | "pcmc" | "pmc">(builder ? saved.to === "builder" || !saved.to ? "builder" : office : office);
-  const [lang, setLang] = useState<"en" | "mr">(saved.lang || "en");
+  const [lang, setLang] = useState<"en" | "mr" | "hi">(saved.lang || "en");
   const [step, setStep] = useState<"choose" | "drafting" | "letter" | "error">("choose");
   const [text, setText] = useState("");
   const [shown, setShown] = useState(0);
@@ -50,6 +50,7 @@ export function LetterSheet({ p, onClose }: { p: Project; onClose: () => void })
     setTimeout(() => setCopied(false), 1600);
   };
   const cardUrl = `${location.origin}/p/${p.id}`;
+  const subject = `Wet-waste processing promised in writing: ${p.project_name || p.proposal_id}`;
 
   return (
     <Dialog label="Ask for the plant to run" onClose={onClose}>
@@ -66,6 +67,7 @@ export function LetterSheet({ p, onClose }: { p: Project; onClose: () => void })
         <div className="seg" role="radiogroup" aria-label="Language">
           <button role="radio" aria-checked={lang === "en"} className={lang === "en" ? "on" : ""} onClick={() => setLang("en")}>English</button>
           <button role="radio" aria-checked={lang === "mr"} className={lang === "mr" ? "on" : ""} onClick={() => setLang("mr")} lang="mr">मराठी</button>
+          <button role="radio" aria-checked={lang === "hi"} className={lang === "hi" ? "on" : ""} onClick={() => setLang("hi")} lang="hi">हिंदी</button>
         </div>
         <button className="btn wide" onClick={draft}>Write my letter</button>
       </div>}
@@ -85,7 +87,10 @@ export function LetterSheet({ p, onClose }: { p: Project; onClose: () => void })
         <div className="actions">
           <button className="btn" onClick={copy}>{copied ? "Copied" : "Copy letter"}</button>
           <a className="btn ghost" href={`https://wa.me/?text=${encodeURIComponent(text + "\n\n" + cardUrl)}`} target="_blank" rel="noreferrer">Send on WhatsApp</a>
+          {/* No recipient: no municipal address is published that we could verify, so the person adds their own. */}
+          <a className="btn ghost" href={`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text + "\n\n" + cardUrl)}`}>Send by email</a>
         </div>
+        <p className="note">Email opens with the letter ready. Add your {to === "builder" ? "builder's" : `${p.city} ward office`} address in the To field.</p>
         <p className="sr-only" aria-live="polite">{copied ? "Letter copied" : !typing ? "Letter ready" : ""}</p>
       </div>}
 

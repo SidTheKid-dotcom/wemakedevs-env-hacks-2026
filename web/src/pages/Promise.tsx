@@ -2,7 +2,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getProject, pdfUrl, type Project } from "../api";
-import { builderName, builderSlug, cityName, kg, longDate, method, placeName } from "../format";
+import { builderName, builderSlug, cityName, kg, longDate, method, placeName, tonnesAYear } from "../format";
 import { easeOut, onFrame, reducedMotion } from "../motion";
 import { arrow } from "../rough";
 import { useLoad } from "../useLoad";
@@ -90,6 +90,9 @@ function Card({ p }: { p: Project }) {
             : <p className="sub">No on-site method found in the minutes.</p>}
         </>}
         {review && <p className="label reason">{p.review_reason}</p>}
+        {!review && p.wet_kg_day ? <p className="outcome">
+          If this plant runs, <b>{tonnesAYear(p.wet_kg_day)} tonnes a year</b> stays where it is made, instead of on trucks to the city's dumping grounds.
+        </p> : null}
         <p className="note">The builder promised in writing to process this waste on site. Ask whether the plant is built and running.</p>
         {p.city === "PCMC" && <p className="sub fines">PCMC notices set fines for large societies that don't process wet waste.</p>}
         <div className="actions">
@@ -99,7 +102,7 @@ function Card({ p }: { p: Project }) {
             <span className="lbl">Send to my society group</span>
             <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><circle cx="18" cy="5" r="2.6" fill="none" stroke="currentColor" strokeWidth="2" /><circle cx="6" cy="12" r="2.6" fill="none" stroke="currentColor" strokeWidth="2" /><circle cx="18" cy="19" r="2.6" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3" stroke="currentColor" strokeWidth="2" /></svg>
           </button>
-          {!review && <p className="cta-note sub">A free letter to the builder or ward office, in English or <span lang="mr">मराठी</span>. No sign-in.</p>}
+          {!review && <p className="cta-note sub">A free letter to the builder or ward office, in English, <span lang="mr">मराठी</span> or <span lang="hi">हिंदी</span>. No sign-in.</p>}
         </div>
       </div>
 
@@ -147,6 +150,10 @@ function Card({ p }: { p: Project }) {
         {builder && <Link className="ink hand" to={`/b/${builderSlug(builder)}`}>Other projects by {builder}</Link>}
       </dl>
       <p className="about sub">VACHAN reads Pune's public environmental-clearance minutes and shows what each builder promised to do with wet waste. A promise is not proof that a plant was built or runs. <Link className="ink hand" to="/">Search another building</Link></p>
+      <p className="fixit sub">
+        Spotted a mistake on this card? <a className="ink hand" target="_blank" rel="noreferrer"
+          href={`https://github.com/SidTheKid-dotcom/wemakedevs-env-hacks-2026/issues/new?title=${encodeURIComponent(`Mistake on ${p.proposal_id}`)}&body=${encodeURIComponent(`Card: ${location.href}\nSource page: ${p.source.page} of ${p.source.mirror_url}\n\nWhat looks wrong:\n`)}`}>Tell us</a>, with the page it is on.
+      </p>
 
       {!review && <QuoteArrow play={play} />}
       {sheet === "letter" && <LetterSheet p={p} onClose={() => setSheet(null)} />}

@@ -13,11 +13,14 @@ BUCKET = os.environ.get("BUCKET", "")
 TABLE = os.environ.get("TABLE", "")
 MODEL_ID = os.environ.get("LETTER_MODEL_ID", "apac.amazon.nova-pro-v1:0")
 DAILY_CAP = int(os.environ.get("DAILY_CAP", "300"))
+GUARDRAIL_ID = os.environ.get("GUARDRAIL_ID", "")
+GUARDRAIL_VERSION = os.environ.get("GUARDRAIL_VERSION", "DRAFT")
 RECIPIENT = {
     "builder": "the builder (the project proponent named below)",
     "pcmc": "the Solid Waste Management Department, Pimpri Chinchwad Municipal Corporation",
     "pmc": "the Solid Waste Management Department, Pune Municipal Corporation",
 }
+LANGUAGES = {"en": "English", "mr": "Marathi", "hi": "Hindi"}
 RULES = """Write a short, polite letter (under 220 words) from the residents of this housing project to {to}.
 Language: {lang}.
 Purpose: ask whether the on-site wet-waste processing promised in the environmental-clearance minutes is built and running, and ask for it to run, so the waste is processed at source.
@@ -42,9 +45,14 @@ def draft(project: dict, to: str, lang: str) -> str:
     facts = {k: project.get(k) for k in ("project_name", "builder", "village", "city", "proposal_id", "meeting_date",
                                          "wet_kg_day", "owc_promised", "owc_quote", "tenements")}
     facts["page"] = project["source"]["page"]
-    prompt = RULES.format(to=RECIPIENT[to], lang="Marathi" if lang == "mr" else "English", facts=json.dumps(facts, ensure_ascii=False))
+    prompt = RULES.format(to=RECIPIENT[to], lang=LANGUAGES[lang], facts=json.dumps(facts, ensure_ascii=False))
+    extra = {}
+    if GUARDRAIL_ID:  # server-side guard: the browser filter alone is bypassable
+        extra["guardrailConfig"] = {"guardrailIdentifier": GUARDRAIL_ID, "guardrailVersion": GUARDRAIL_VERSION}
     resp = bedrock.converse(modelId=MODEL_ID, messages=[{"role": "user", "content": [{"text": prompt}]}],
-                            inferenceConfig={"maxTokens": 700, "temperature": 0.2})
+                            inferenceConfig={"maxTokens": 700, "temperature": 0.2}, **extra)
+    if resp.get("stopReason") == "guardrail_intervened":
+        raise ValueError("the draft was stopped by the guardrail")
     return resp["output"]["message"]["content"][0]["text"]
 
 
@@ -52,7 +60,7 @@ def handler(event, context=None):
     try:
         body = json.loads(event.get("body") or "{}")
         pid, to, lang = body["id"], body.get("to", "builder"), body.get("lang", "en")
-        if to not in RECIPIENT or lang not in ("en", "mr") or not pid.replace("-", "").isalnum():
+        if to not in RECIPIENT or lang not in LANGUAGES or not pid.replace("-", "").isalnum():
             return _reply(400, {"error": "bad request"})
         if _over_cap():
             return _reply(429, {"error": "Daily letter limit reached. Please try again tomorrow."})
@@ -60,6 +68,9 @@ def handler(event, context=None):
         return _reply(200, {"text": draft(project, to, lang)})
     except s3.exceptions.NoSuchKey:
         return _reply(404, {"error": "project not found"})
+    except ValueError as e:  # the guardrail stopped the draft; the card and its page still stand
+        print("guardrail", e)
+        return _reply(422, {"error": "The draft could not be written safely. The promise and the page are still here."})
     except (KeyError, json.JSONDecodeError):
         return _reply(400, {"error": "bad request"})
 

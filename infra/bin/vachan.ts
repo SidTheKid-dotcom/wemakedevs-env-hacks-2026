@@ -1,5 +1,6 @@
 // VACHAN on AWS: crawl PARIVESH minutes -> read each PDF with Bedrock -> publish static JSON behind CloudFront.
 import * as cdk from "aws-cdk-lib";
+import * as bedrock from "aws-cdk-lib/aws-bedrock";
 import * as budgets from "aws-cdk-lib/aws-budgets";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
@@ -83,9 +84,43 @@ new events.Rule(stack, "Nightly", {
 });
 
 // Public letter drafting: no login, so it is capped (2 at a time, DAILY_CAP a day).
+// The data shows promises, not violations. This stops an accusing letter at the model,
+// not in the browser, where anyone calling the function URL directly would bypass it.
+const guard = new bedrock.CfnGuardrail(stack, "LetterGuard", {
+  name: "vachan-letter",
+  blockedInputMessaging: "This request cannot be used to draft a letter.",
+  blockedOutputsMessaging: "The draft could not be written safely.",
+  description: "Keeps resident letters to 'promised in writing' and never an accusation.",
+  wordPolicyConfig: {
+    wordsConfig: ["violated", "violation", "illegal", "fraud", "fraudulent", "criminal", "offence",
+      "failed to", "failure to", "non-compliance", "noncompliance", "guilty", "penalty notice",
+      "prosecute", "prosecution", "sue", "lawsuit", "legal action"].map((text) => ({ text })),
+  },
+  contentPolicyConfig: {
+    filtersConfig: [
+      { type: "INSULTS", inputStrength: "HIGH", outputStrength: "HIGH" },
+      { type: "MISCONDUCT", inputStrength: "HIGH", outputStrength: "HIGH" },
+      { type: "PROMPT_ATTACK", inputStrength: "HIGH", outputStrength: "NONE" },
+    ],
+  },
+  sensitiveInformationPolicyConfig: { // the minutes may carry a stray phone number or e-mail
+    piiEntitiesConfig: [
+      { type: "PHONE", action: "ANONYMIZE" },
+      { type: "EMAIL", action: "ANONYMIZE" },
+      { type: "CREDIT_DEBIT_CARD_NUMBER", action: "BLOCK" },
+    ],
+  },
+});
+
 // This handler is the only thing open to the internet, so it gets only what it uses:
 // one published record to read, one counter to add to, one model to call.
 const letter = step("Letter", "vachan.letter.handler", 1, 512, false);
+letter.addEnvironment("GUARDRAIL_ID", guard.attrGuardrailId);
+letter.addEnvironment("GUARDRAIL_VERSION", guard.attrVersion);
+letter.addToRolePolicy(new iam.PolicyStatement({
+  actions: ["bedrock:ApplyGuardrail"],
+  resources: [guard.attrGuardrailArn],
+}));
 letter.addEnvironment("DAILY_CAP", "1500"); // about $0.003 a letter: the worst case is about $4.50 a day
 bucket.grantRead(letter, "data/p/*");
 letter.addToRolePolicy(new iam.PolicyStatement({

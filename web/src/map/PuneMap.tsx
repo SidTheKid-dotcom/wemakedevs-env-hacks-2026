@@ -63,9 +63,37 @@ export function PuneMap({ points, focus, radiusKm = 2, highlight, label = "Map o
   const centre = [vb[0] + vb[2] / 2, vb[1] + vb[3] / 2];
   const f = focus ? project(focus.lat, focus.lon) : null;
 
+  // Zoom and drag: dots overlap where building is dense, and a phone cannot pinch an SVG.
+  const clampVb = ([x, y, w, h]: number[]) => {
+    const nw = Math.min(FULL[2], Math.max(FULL[2] / 10, w)), nh = nw * (FULL[3] / FULL[2]);
+    return [Math.min(FULL[2] - nw, Math.max(0, x)), Math.min(FULL[3] - nh, Math.max(0, y)), nw, nh];
+  };
+  const zoom = (k: number) => setVb(([x, y, w, h]) => {
+    const nw = w * k, nh = h * k;
+    return clampVb([x + (w - nw) / 2, y + (h - nh) / 2, nw, nh]);
+  });
+  const zoomed = vb[2] < FULL[2] - 1;
+  const pan = useRef<{ x: number; y: number; vb: number[]; moved: boolean } | null>(null);
+  const onDown = (e: React.PointerEvent<SVGSVGElement>) => {
+    if (!zoomed) return;
+    pan.current = { x: e.clientX, y: e.clientY, vb, moved: false };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onMove = (e: React.PointerEvent<SVGSVGElement>) => {
+    const p = pan.current;
+    if (!p) return;
+    const scale = p.vb[2] / (box.current?.clientWidth || 1);
+    const dx = (e.clientX - p.x) * scale, dy = (e.clientY - p.y) * scale;
+    if (Math.abs(dx) + Math.abs(dy) > 2 * scale) p.moved = true;
+    setVb(clampVb([p.vb[0] - dx, p.vb[1] - dy, p.vb[2], p.vb[3]]));
+  };
+  const onUp = () => { if (pan.current?.moved) setTip(null); pan.current = null; };
+
   return (
     <div className="map" ref={box}>
       <svg viewBox={vb.join(" ")} role="img" aria-label={label} preserveAspectRatio="xMidYMid meet"
+        className={zoomed ? "zoomed" : undefined}
+        onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
         onClick={(e) => { if (e.target === e.currentTarget) setTip(null); }}>
         <defs>
           <filter id="riso"><feTurbulence baseFrequency="0.8" numOctaves="2" seed="2" /><feColorMatrix values="0 0 0 0 0.12  0 0 0 0 0.35  0 0 0 0 0.24  0 0 0 0.09 0" /><feComposite in2="SourceGraphic" operator="in" /></filter>
@@ -110,6 +138,11 @@ export function PuneMap({ points, focus, radiusKm = 2, highlight, label = "Map o
           <text x={f[0] + radiusKm * KM * 0.62} y={f[1] - radiusKm * KM * 0.86} className="km" style={{ fontSize: 22 * unit }}>{radiusKm} km</text>
         </>}
       </svg>
+      {!focus && <div className="zoomer no-print">
+        <button type="button" aria-label="Zoom in" onClick={() => zoom(1 / 1.6)}>+</button>
+        <button type="button" aria-label="Zoom out" onClick={() => zoom(1.6)} disabled={!zoomed}>−</button>
+        {zoomed && <button type="button" className="reset" onClick={() => setVb(FULL)}>Whole city</button>}
+      </div>}
       {!focus && <p className="legend hand"><span className="lg-dot" /> bigger dot = more wet waste promised<br /><span className="lg-dot hollow" /> hollow = a person must check</p>}
       {tip && <Tip tip={tip} wards={wards} boxWidth={box.current?.clientWidth || 0} />}
     </div>

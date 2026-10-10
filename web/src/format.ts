@@ -19,6 +19,9 @@ export function placeName(p: Pick<Summary, "project_name" | "village">) {
   if (generic) return p.village ? `Housing project, ${title(p.village)}` : "Housing project";
   return p.village && !name.toLowerCase().includes(p.village.toLowerCase()) ? `${name}, ${title(p.village)}` : name;
 }
+/** A year of the promised waste, in tonnes: what stays out of the trucks if the plant runs. */
+export const tonnesAYear = (kgPerDay: number) => Math.round((kgPerDay * 365) / 1000);
+
 /** Locality names in a village string: "Pandhare Wasti, Punawale, Tal.-Mulshi, Pune-411033" -> ["Pandhare Wasti", "Punawale"]. */
 export function localities(village: string | null | undefined) {
   return (village || "").split(/[,(]/).map((s) => s.replace(/\d+|[.)]/g, " ").replace(/\s+/g, " ").trim())

@@ -42,7 +42,7 @@ export const getProjects = () => (projects ??= json<Summary[]>(`${DATA}/data/pro
 export const getProject = (id: string) => json<Project>(`${DATA}/data/p/${encodeURIComponent(id)}.json`);
 export const pdfUrl = (p: Project) => `${p.source.mirror_url}#page=${p.source.page}`;
 
-export async function draftLetter(id: string, to: "builder" | "pcmc" | "pmc", lang: "en" | "mr") {
+export async function draftLetter(id: string, to: "builder" | "pcmc" | "pmc", lang: "en" | "mr" | "hi") {
   const r = await json<{ text?: string; error?: string }>(API, {
     method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id, to, lang }),
   });
