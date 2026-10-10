@@ -111,6 +111,8 @@
   .card .promised { order: 5; } .card .method, .card .reason { order: 6; } .card-right { order: 7; }
   .card .kicker { order: 0; }
   .card .note { order: 8; } .card .fines { order: 9; } .card .facts { order: 10; } .card .about { order: 12; }
+  /* added later: without an order they jumped above the place name on phones */
+  .card .outcome { order: 6; } .card .fixit { order: 13; }
   .card .actions { order: 11; position: sticky; bottom: 8px; z-index: 6; padding: 14px 0 6px; background: var(--paper) var(--paper-tex); background-size: 384px; }
   .card-stamp { display: none; }
   .card.review .card-stamp { display: block; position: relative; top: 0; right: 0; justify-self: center; margin: 4px 0 8px; }
