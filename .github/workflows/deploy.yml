@@ -49,6 +49,14 @@ jobs:
         working-directory: web/dist
         run: zip -qr ../site.zip .
 
+      - name: TEMPORARY which claims does the token carry
+        run: |
+          set -euo pipefail
+          tok=$(curl -sH "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
+          echo "$tok" | cut -d. -f2 | tr '_-' '/+' | base64 -d 2>/dev/null \
+            | jq '{sub, aud, repository, ref, workflow_ref}'
+
       - name: Get a one-hour AWS token
         uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v5.0.0
         with:
