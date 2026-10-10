@@ -60,7 +60,7 @@ p { margin: 0; }
 .wordmark b { font: 800 28px/1 var(--display); letter-spacing: .01em; }
 .wordmark i { font: 700 24px/1 var(--deva); font-style: normal; padding-left: 12px; border-left: 1.5px solid var(--ink); }
 .wordmark svg { position: absolute; left: 0; bottom: -10px; width: 62%; height: 10px; overflow: visible; }
-.nav { display: flex; gap: 18px; align-items: center; }
+.nav { display: flex; gap: 10px 18px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 /* phones: the links take a second row under the wordmark, so both always show */
 @media (max-width: 599px) {
   .masthead { flex-wrap: wrap; row-gap: 4px; }
@@ -68,6 +68,9 @@ p { margin: 0; }
   .nav .ink { min-height: 44px; font-size: 14px; }
   .nav .btn.round { position: absolute; right: 0; top: 0; }
   .masthead { position: relative; }
+  /* the language keys sit on the wordmark's line, at the right */
+  .nav .langs { position: absolute; right: 0; top: 0; margin-inline-start: 0; }
+  .nav .btn.round + .langs, .nav .btn.round ~ .langs { right: 52px; }
 }
 @media (min-width: 1024px) { .wordmark b { font-size: 48px; } .wordmark i { font-size: 40px; } }
 
@@ -91,7 +94,10 @@ p { margin: 0; }
 .ink.hand::after { content: none; }
 
 /* nav letter roll (oryzo-style): each letter doubled in a one-line mask */
-.roll { display: inline-flex; overflow: hidden; height: 1.3em; line-height: 1.3em; }
+.roll { display: inline-flex; overflow: hidden; height: 1.3em; line-height: 1.3em; white-space: nowrap; }
+/* Devanagari stacks marks above and below the line, so the rolling clip would cut them.
+   Those labels render as plain text at the link's own line height. */
+.roll.whole { display: inline-block; overflow: visible; height: auto; line-height: inherit; white-space: nowrap; }
 .roll span { display: inline-flex; flex-direction: column; transition: transform .32s var(--ease-out); transition-delay: calc(var(--i) * 18ms); }
 .roll span::after { content: attr(data-c); }
 @media (hover: hover) { a:hover .roll span { transform: translateY(-1.3em); } }
@@ -106,7 +112,7 @@ p { margin: 0; }
 /* ---------- glossy buttons (HeyClicky shine) ---------- */
 .btn {
   position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 26px;
-  border: 0; border-radius: 10px; cursor: pointer; text-decoration: none; overflow: hidden; font: 700 19px/1 var(--display);
+  border: 0; border-radius: 10px; cursor: pointer; text-decoration: none; overflow: hidden; font: 700 19px/1.35 var(--display);
   color: #fff; background: linear-gradient(#2a7a53, #1F5A3D 55%, #174631);
   box-shadow: 0 3px 0 #123726, 0 8px 14px -6px #0006; transition: transform .12s, box-shadow .12s;
 }
