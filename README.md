@@ -106,7 +106,7 @@ All code in this repo was written during the event (8–11 Oct 2026). Before kic
 ## What is not built
 - We do not know whether a plant runs today. We show what was promised in writing.
 - Minutes before 2019 have no public index, and buildings below the clearance size are not in these minutes.
-- 12 of the 1,027 minutes are scans. The Textract step for them is built and deployed, but they have not been through a full run yet, so their projects are not in the totals.
+- 12 of the 1,027 minutes are scans. Textract reads them, but our agenda splitter does not yet recognise the scanned layout, so their projects are not in the totals.
 - One damaged PDF (meeting 47956) is skipped.
 - No hand-labelled accuracy figure yet. The status rules are tested against real lines from the minutes.
 
