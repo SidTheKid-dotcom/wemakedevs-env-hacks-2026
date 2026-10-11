@@ -58,7 +58,7 @@ export default function Home() {
           <p className="tagline">{t("Read the fine print before you pay the fine.")}</p>
           <h1 className="headline">{t("Did your builder promise to process your society's wet waste?")}</h1>
           <p className="lede">
-            {s ? t2("{owc} of the {total} Pune projects recommended for clearance did, in writing.", { owc: s.owc_projects, total: s.counted_projects }) : t("Pune's large housing projects did, in writing.")}{" "}
+            {s ? t2("{owc} of the {total} checked Pune projects recommended for clearance did, in writing.", { owc: s.owc_projects, total: s.counted_projects }) : t("Pune's large housing projects did, in writing.")}{" "}
             {t("Find the promise and its page. Then ask for the plant to run.")}
           </p>
           <div id="search"><SearchTape cta={t("Find the promise")} value={q || params.get("label") || ""} /></div>
@@ -116,7 +116,7 @@ function Chain({ s }: { s?: Stats }) {
         <li className="link">
           <span className="hand cue">{t("The solution")}</span>
           <p className="say">{t("Who is keeping the promise?")}</p>
-          <p>{s ? t2("To get environmental clearance, {owc} of the {total} Pune projects promised in writing to process their wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.", { owc: s.owc_projects, total: s.counted_projects }) : t("To get environmental clearance, each large project promised in writing to process its wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.")}</p>
+          <p>{s ? t2("To get environmental clearance, {owc} of the {total} checked Pune projects promised in writing to process their wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.", { owc: s.owc_projects, total: s.counted_projects }) : t("To get environmental clearance, each large project promised in writing to process its wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.")}</p>
         </li>
         <li className="link">
           <span className="hand cue">{t("How")}</span>

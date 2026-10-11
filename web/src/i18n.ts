@@ -83,7 +83,7 @@ const mr: Dict = {
   "Read the fine print before you pay the fine.": "दंड भरण्याआधी बारीक अक्षरातला मजकूर वाचा.",
   "Did your builder promise to process your society's wet waste?": "तुमच्या बिल्डरने तुमच्या सोसायटीचा ओला कचरा जागेवरच प्रोसेस करायचं वचन दिलं होतं का?",
   "Find the promise and its page. Then ask for the plant to run.": "ते वचन आणि त्याचे पेज शोधा. मग प्लांट चालू करायला सांगा.",
-  "{owc} of the {total} Pune projects recommended for clearance did, in writing.": "मंजुरीसाठी शिफारस झालेल्या {total} पुणे प्रोजेक्टपैकी {owc} प्रोजेक्टनी हे लेखी वचन दिलंय.",
+  "{owc} of the {total} checked Pune projects recommended for clearance did, in writing.": "मंजुरीसाठी शिफारस झालेल्या आणि तपासलेल्या {total} पुणे प्रोजेक्टपैकी {owc} प्रोजेक्टनी हे लेखी वचन दिलंय.",
   "Pune's large housing projects did, in writing.": "पुण्यातल्या मोठ्या गृहप्रकल्पांनी हे लेखी वचन दिलंय.",
   "Find the promise": "वचन शोधा",
   "Area, project or builder": "भाग, प्रोजेक्ट किंवा बिल्डर",
@@ -216,7 +216,7 @@ const mr: Dict = {
 
   // --- chain and card details ---
   "From the problem to the impact": "समस्येपासून परिणामापर्यंत",
-  "To get environmental clearance, {owc} of the {total} Pune projects promised in writing to process their wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.": "पर्यावरण मंजुरी मिळवण्यासाठी {total} पैकी {owc} पुणे प्रोजेक्टनी त्यांचा ओला कचरा जागेवरच प्रोसेस करायचं लेखी वचन दिलं. कोणीही न वाचणाऱ्या हजाराहून जास्त सरकारी PDF मधून VACHAN हे वचन शोधून काढतं.",
+  "To get environmental clearance, {owc} of the {total} checked Pune projects promised in writing to process their wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.": "पर्यावरण मंजुरी मिळवण्यासाठी तपासलेल्या {total} पैकी {owc} पुणे प्रोजेक्टनी त्यांचा ओला कचरा जागेवरच प्रोसेस करायचं लेखी वचन दिलं. कोणीही न वाचणाऱ्या हजाराहून जास्त सरकारी PDF मधून VACHAN हे वचन शोधून काढतं.",
   "To get environmental clearance, each large project promised in writing to process its wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.": "पर्यावरण मंजुरी मिळवण्यासाठी प्रत्येक मोठ्या प्रोजेक्टनं त्याचा ओला कचरा जागेवरच प्रोसेस करायचं लेखी वचन दिलं. कोणीही न वाचणाऱ्या हजाराहून जास्त सरकारी PDF मधून VACHAN हे वचन शोधून काढतं.",
   "It goes to the builder or the ward office, with the page. Ward officers get a list of whom to check first.": "ते पेजसह बिल्डरकडे किंवा वॉर्ड ऑफिसकडे जातं. वॉर्ड अधिकाऱ्यांना आधी कोणाकडे जायचं याची यादी मिळते.",
   "of wet waste a day, promised in writing to be processed on site across Pune. Every plant that runs keeps that waste where it is made, instead of on trucks to the city's dumping grounds and waste plants.": "इतक्या ओल्या कचऱ्यावर रोज जागेवरच प्रक्रिया करायचं लेखी वचन पुण्यात दिलं गेलंय. चालू असलेला प्रत्येक प्लांट तो कचरा जिथे तयार होतो तिथेच ठेवतो; तो ट्रकने शहराच्या डंपिंग ग्राउंड आणि प्लांटकडे जात नाही.",
@@ -401,7 +401,7 @@ const hi: Dict = {
   "Read the fine print before you pay the fine.": "जुर्माना भरने से पहले बारीक अक्षरों में लिखी शर्तें पढ़ें।",
   "Did your builder promise to process your society's wet waste?": "क्या आपके बिल्डर ने आपकी सोसायटी का गीला कचरा साइट पर ही प्रोसेस करने का वादा किया था?",
   "Find the promise and its page. Then ask for the plant to run.": "वह वादा और उसका पेज खोजें। फिर प्लांट चालू करने को कहें।",
-  "{owc} of the {total} Pune projects recommended for clearance did, in writing.": "मंज़ूरी के लिए भेजे गए {total} पुणे प्रोजेक्ट में से {owc} ने यह वादा लिखित में किया है।",
+  "{owc} of the {total} checked Pune projects recommended for clearance did, in writing.": "मंज़ूरी के लिए भेजे गए और जाँचे गए {total} पुणे प्रोजेक्ट में से {owc} ने यह वादा लिखित में किया है।",
   "Pune's large housing projects did, in writing.": "पुणे के बड़े हाउसिंग प्रोजेक्ट ने यह वादा लिखित में किया है।",
   "Find the promise": "वादा खोजें",
   "Area, project or builder": "क्षेत्र, प्रोजेक्ट या बिल्डर",
@@ -534,7 +534,7 @@ const hi: Dict = {
 
   // --- chain and card details ---
   "From the problem to the impact": "समस्या से असर तक",
-  "To get environmental clearance, {owc} of the {total} Pune projects promised in writing to process their wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.": "पर्यावरण मंज़ूरी के लिए {total} में से {owc} पुणे प्रोजेक्ट ने अपना गीला कचरा साइट पर ही प्रोसेस करने का लिखित वादा किया। जिन्हें कोई नहीं पढ़ता, ऐसी हज़ार से ज़्यादा सरकारी PDF में से VACHAN यह वादा ढूँढ निकालता है।",
+  "To get environmental clearance, {owc} of the {total} checked Pune projects promised in writing to process their wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.": "पर्यावरण मंज़ूरी के लिए जाँचे गए {total} में से {owc} पुणे प्रोजेक्ट ने अपना गीला कचरा साइट पर ही प्रोसेस करने का लिखित वादा किया। जिन्हें कोई नहीं पढ़ता, ऐसी हज़ार से ज़्यादा सरकारी PDF में से VACHAN यह वादा ढूँढ निकालता है।",
   "To get environmental clearance, each large project promised in writing to process its wet waste on site. VACHAN finds that promise in over a thousand public PDFs nobody reads.": "पर्यावरण मंज़ूरी के लिए हर बड़े प्रोजेक्ट ने अपना गीला कचरा साइट पर ही प्रोसेस करने का लिखित वादा किया। जिन्हें कोई नहीं पढ़ता, ऐसी हज़ार से ज़्यादा सरकारी PDF में से VACHAN यह वादा ढूँढ निकालता है।",
   "It goes to the builder or the ward office, with the page. Ward officers get a list of whom to check first.": "यह पेज के साथ बिल्डर या वार्ड ऑफिस को जाता है। वार्ड अधिकारियों को मिलती है सूची कि पहले किसके पास जाना है।",
   "of wet waste a day, promised in writing to be processed on site across Pune. Every plant that runs keeps that waste where it is made, instead of on trucks to the city's dumping grounds and waste plants.": "इतना गीला कचरा रोज़, पुणे भर में साइट पर ही प्रोसेस करने का लिखित वादा किया हुआ। चलता हुआ हर प्लांट उस कचरे को वहीं रखता है जहाँ बनता है, शहर की डंपिंग ग्राउंड और प्लांट तक ट्रक से जाने के बजाय।",

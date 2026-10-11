@@ -367,6 +367,7 @@
 .ledger td.num { font: 800 20px var(--display); white-space: nowrap; }
 .ledger a { color: var(--ink); }
 .ledger .ink { color: var(--leaf); min-height: 0; white-space: nowrap; }
+.ledger .by { display: block; font: 400 13px/1.35 "Courier Prime", monospace; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 36ch; } /* the builder, so an officer knows whom to ask first */
 .officer-cols > * { min-width: 0; }
 .review-queue { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; align-content: start; }
 .review-queue h2 { font: 400 26px var(--hand); }

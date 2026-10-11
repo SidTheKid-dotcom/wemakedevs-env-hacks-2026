@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getProjects } from "../api";
-import { kg, method, placeName, shortDate } from "../format";
+import { builderName, kg, method, placeName, shortDate } from "../format";
 import { useLoad } from "../useLoad";
 import { Desk } from "../ui/Desk";
 import { Tick } from "../ui/Ink";
@@ -55,7 +55,7 @@ export default function Officer() {
                       {first.map((p, i) => (
                         <tr key={p.id} className="fade-in" style={{ "--delay": `${i * 30}ms` } as CSSProperties}>
                           <td className="hand">{i + 1}</td>
-                          <td><Link data-data to={`/p/${p.id}`}>{placeName(p)}</Link></td>
+                          <td><Link data-data to={`/p/${p.id}`}>{placeName(p)}</Link>{p.builder && <span className="by" data-data>{builderName(p.builder)}</span>}</td>
                           <td className="num">{kg(p.wet_kg_day)} kg</td>
                           <td>{method(p.quote) || t("on site")}</td>
                           <td>{shortDate(p.meeting_date)}</td>
