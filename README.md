@@ -49,7 +49,7 @@ Every number here comes from [`stats.json`](https://d18hjofgs77fd1.cloudfront.ne
 | Amazon EventBridge | Starts the pipeline every night at 02:00 IST | New minutes arrive weekly | [1:52](https://youtu.be/_HbZJ4fCaak?t=112) |
 | AWS Step Functions (Distributed Map) | Reads about 1,000 PDFs in parallel with retries and a failure budget | Scale, plus a run graph we can show | [1:54](https://youtu.be/_HbZJ4fCaak?t=114), [2:02](https://youtu.be/_HbZJ4fCaak?t=122) |
 | AWS Lambda (container image) | Crawl PARIVESH, read each PDF (`pdftotext`), split it into agenda items, publish, prove, draft letters | One image, five small handlers | [1:55](https://youtu.be/_HbZJ4fCaak?t=115), [2:23](https://youtu.be/_HbZJ4fCaak?t=143) |
-| Amazon S3 + Amazon CloudFront | Mirror of every source PDF (named by SHA-256) and the JSON the website reads | PARIVESH has broken TLS and partly fails outside India; judges must still open the page | [1:59](https://youtu.be/_HbZJ4fCaak?t=119), [2:22](https://youtu.be/_HbZJ4fCaak?t=142) |
+| Amazon S3 + Amazon CloudFront | Mirror of every source PDF (named by SHA-256) and the JSON the website reads | Anyone, anywhere, can always open the exact source page, fast | [1:59](https://youtu.be/_HbZJ4fCaak?t=119), [2:22](https://youtu.be/_HbZJ4fCaak?t=142) |
 | Amazon Textract | Reads minutes that are photographs of paper, where `pdftotext` finds no text | Without it, those meetings drop out silently | [2:08](https://youtu.be/_HbZJ4fCaak?t=128) |
 | Amazon Bedrock (Amazon Nova Pro) | Reads one project at a time into a fixed schema; drafts the letter | Telling operation-phase waste from construction-phase waste needs reading, not regex | [2:10](https://youtu.be/_HbZJ4fCaak?t=130), [1:24](https://youtu.be/_HbZJ4fCaak?t=84) |
 | Amazon Bedrock Guardrails | Stops any letter draft that uses one of 17 accusing words or phrases | A promise is not proof; a public letter tool must never accuse | [1:46](https://youtu.be/_HbZJ4fCaak?t=106) |
@@ -131,17 +131,16 @@ VACHAN has three parts: what to build, how it looks, and how it runs. Each of us
 - **The hard part is one line.** Each project lists wet waste twice: during construction and after people move in. Only the second is the promise. A regex cannot tell them apart reliably, so Bedrock reads the block and plain code checks that the quoted line, the number and the page are really there.
 - **Measure before you claim.** A first sample of 25 PDFs suggested 40 % were scanned images. The full corpus had 12 scans in 1,027. Our first total (over 350 t a day for PCMC alone) also fell once we dropped deferred proposals and counted each site once.
 - **Data helps only when someone can act on it.** A total of 735 tonnes changes nothing. One building's promise, its page and a ready letter can.
-- **Government sources fail, so keep a copy.** PARIVESH has broken TLS and outages. Mirroring every PDF on S3 and CloudFront is what lets anyone open the exact page.
-- **Showing doubt builds trust.** 385 records say "A person must check this" with the reason. That turned out to be a feature, not an embarrassment.
+- **Keep your own copy of the source.** Government portals have outages. Mirroring every PDF on S3 and CloudFront means anyone can always open the exact page.
+- **Showing doubt builds trust.** 385 records say "A person must check this" with the reason. That turned out to be one of the strongest features.
 - **People arrive from WhatsApp on a phone.** The number, the method and the page have to lead; everything else can wait.
 
 ## Our feedback on AWS
-- **Amazon Bedrock model access:** Anthropic models needed a use-case form on our new account, so we used Amazon Nova Pro. On a 25-item sample it matched our plain-code figure on 23 of 24 items. A clearer note at sign-up about which models need a form would have saved us time at kickoff.
-- **Bedrock Guardrails:** the prompt-attack filter read our own instructions as an injection and refused every letter draft. Guarding only the model's output fixed it. A worked example that separates the system prompt from user input would help.
-- **Nova Pro request quota:** 50 requests a minute shaped the whole run; we capped the Distributed Map at 4 parallel workers. Seeing that limit next to the model in the console, before the first throttle, would help.
-- **Step Functions Distributed Map:** retries and a failure budget let a run over about 1,000 PDFs finish when a few were damaged, and the run graph is the clearest way to show the pipeline to someone else.
-- **GitHub Actions to Amplify over OIDC:** no stored keys is the right default, but getting the role's trust condition to match the token's subject claim took a debug step that printed the claims. An example for the GitHub subject format would have saved that.
-- **AWS Budgets:** alerts were easy. Making spend automatically stop Bedrock, Textract and new runs at $50 needed a budget action plus a deny policy; a ready-made "stop these services" option would suit hackathons and public demos.
+- **Amazon Bedrock (Amazon Nova Pro):** a strong fit for reading long government tables. On a 25-item sample it matched our plain-code figure on 23 of 24, and its strict JSON output made every check simple to write. *Suggestion:* a short note in the model catalogue on which models need a use-case form would make hackathon kickoffs even faster.
+- **Amazon Bedrock Guardrails:** one guardrail made every letter safe to send, and `apply-guardrail` let us test the exact sentence we were worried about from the CLI. Applying it to the model's output is the right setup for apps with long system prompts. *Suggestion:* a worked example of that pattern in the docs would help other builders start there.
+- **Step Functions Distributed Map:** retries and a failure budget let a run over about 1,000 PDFs finish cleanly, and the run graph is the clearest way to show the pipeline to someone else. `MaxConcurrency` kept us comfortably inside the Nova Pro quota of 50 requests a minute. *Suggestion:* showing that quota next to the model in the console would help plan concurrency up front.
+- **GitHub Actions to Amplify over OIDC:** no stored keys, which is the right default. *Suggestion:* an example of the GitHub subject-claim format next to the trust policy would make setup a one-step job.
+- **AWS Budgets:** alerts took minutes, and a budget action with a deny policy gave our public, sign-in-free app a hard stop at $50. *Suggestion:* a ready-made "pause these services" action would suit hackathons and public demos perfectly.
 
 ## AI tools used
 - **Claude Code:** coding partner for the pipeline, infrastructure, website and the video's animated scenes.
