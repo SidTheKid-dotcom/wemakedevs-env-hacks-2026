@@ -150,7 +150,7 @@ VACHAN has three parts: what to build, how it looks, and how it runs. Each of us
 - **faster-whisper** (open source): word timings, to sync the captions and animations to the narration.
 
 ## Credits and licences
-- Code: MIT (see `LICENSE`).
+- Code: MIT (see `LICENSE`). Data licences: see `NOTICE`.
 - Minutes: PARIVESH, Ministry of Environment, Forest and Climate Change, Government of India (public documents).
 - Ward boundaries: DataMeet Municipal Spatial Data, CC BY-SA 2.5 IN (PMC 2022 wards also MIT via answerquest/pune-2022-wards).
 - Libraries: PDF.js (Apache-2.0), React and React Router (MIT). Poppler (GPL) runs as a command-line tool inside the Lambda image.

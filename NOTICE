@@ -1,0 +1,9 @@
+VACHAN
+Copyright (c) 2026 The VACHAN team (Siddhant Vishnu, Dushyant, Shreya)
+
+The code is under the MIT License (see LICENSE). this licence covers the code. Data in this repository keeps its own licence:
+- pipeline/vachan/wards/*.geojson: DataMeet Municipal Spatial Data, CC BY-SA 2.5 India
+  (https://creativecommons.org/licenses/by-sa/2.5/in/). PMC 2022 wards are also published
+  under MIT by answerquest/pune-2022-wards.
+- SEAC minutes are public documents of the Government of India (PARIVESH); we link to them
+  and keep a mirror for citation only.

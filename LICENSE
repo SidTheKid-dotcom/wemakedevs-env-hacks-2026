@@ -19,11 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-This licence covers the code. Data in this repository keeps its own licence:
-- pipeline/vachan/wards/*.geojson: DataMeet Municipal Spatial Data, CC BY-SA 2.5 India
-  (https://creativecommons.org/licenses/by-sa/2.5/in/). PMC 2022 wards are also published
-  under MIT by answerquest/pune-2022-wards.
-- SEAC minutes are public documents of the Government of India (PARIVESH); we link to them
-  and keep a mirror for citation only.
