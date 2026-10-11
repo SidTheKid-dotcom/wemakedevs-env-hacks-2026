@@ -35,3 +35,15 @@ def test_the_blocked_list_is_usable_by_the_guardrail():
 def test_every_language_is_offered_to_the_model():
     assert '"en"' in SOURCE and '"mr"' in SOURCE and '"hi"' in SOURCE
     assert "Marathi" in SOURCE and "Hindi" in SOURCE and "English" in SOURCE
+
+
+def test_marathi_and_hindi_get_a_glossary():
+    """A shipped bug: with no glossary the model wrote OWC as "over-the-wall" and mixed Hindi into Marathi."""
+    assert "ओला कचरा प्रक्रिया यंत्र (OWC)" in SOURCE and "गीला कचरा" in SOURCE
+    assert "Never expand an abbreviation" in RULES and "{terms}" in RULES
+
+
+def test_the_glossary_trips_no_blocked_word():
+    terms = SOURCE.split("TERMS = {")[1].split("\n}\n")[0]
+    found = [w for w in BLOCKED if re.search(rf"\b{re.escape(w)}", terms, re.I)]
+    assert not found, found

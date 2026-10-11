@@ -25,8 +25,20 @@ RECIPIENT = {
     "pmc": "the Solid Waste Management Department, Pune Municipal Corporation",
 }
 LANGUAGES = {"en": "English", "mr": "Marathi", "hi": "Hindi"}
+#: Terms the model must not guess. Without these it expanded "OWC" as "over-the-wall" and slipped
+#: Hindi words ("गीली") into Marathi letters.
+TERMS = {
+    "en": "",
+    "mr": "Write natural, everyday Marathi, as a resident would. Use Marathi words, not Hindi ones. "
+          "Terms: OWC = organic waste converter, write it as \"ओला कचरा प्रक्रिया यंत्र (OWC)\"; wet waste = \"ओला कचरा\"; "
+          "environmental clearance = \"पर्यावरण मंजुरी\"; minutes = \"इतिवृत्त\"; housing society = \"गृहनिर्माण संस्था\".",
+    "hi": "Write natural, everyday Hindi, as a resident would. "
+          "Terms: OWC = organic waste converter, write it as \"जैविक कचरा प्रसंस्करण यंत्र (OWC)\"; wet waste = \"गीला कचरा\"; "
+          "environmental clearance = \"पर्यावरण मंज़ूरी\"; minutes = \"कार्यवृत्त\"; housing society = \"हाउसिंग सोसाइटी\".",
+}
 RULES = """Write a short, polite letter (under 220 words) from the residents of this housing project to {to}.
-Language: {lang}.
+Language: {lang}. {terms}
+Never expand an abbreviation unless these instructions give its meaning. Keep the quoted evidence line exactly as written, in English.
 Purpose: ask whether the on-site wet-waste processing promised in the environmental-clearance minutes is built and running, and ask for it to run, so the waste is processed at source.
 Use only these facts. Quote the evidence line exactly once. Cite the proposal number, meeting date and page.
 Say "promised in writing". Do not accuse anyone of wrongdoing, and do not mention penalties or court action: the minutes record a promise, not a verdict. Ask only whether the promised plant is built and running. Do not give legal advice. Leave [Name] and [Flat no.] blank for the residents.
@@ -49,7 +61,7 @@ def draft(project: dict, to: str, lang: str) -> str:
     facts = {k: project.get(k) for k in ("project_name", "builder", "village", "city", "proposal_id", "meeting_date",
                                          "wet_kg_day", "owc_promised", "owc_quote", "tenements")}
     facts["page"] = project["source"]["page"]
-    prompt = RULES.format(to=RECIPIENT[to], lang=LANGUAGES[lang], facts=json.dumps(facts, ensure_ascii=False))
+    prompt = RULES.format(to=RECIPIENT[to], lang=LANGUAGES[lang], terms=TERMS[lang], facts=json.dumps(facts, ensure_ascii=False))
     extra = {}
     if GUARDRAIL_ID:  # server-side guard: the browser filter alone is bypassable
         extra["guardrailConfig"] = {"guardrailIdentifier": GUARDRAIL_ID, "guardrailVersion": GUARDRAIL_VERSION}
