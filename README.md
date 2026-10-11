@@ -1,7 +1,11 @@
 # VACHAN (वचन, "promise")
 **Gets wet waste processed at source.** Large housing projects in Pune promised the government, in writing, to process their own wet waste on site. VACHAN reads those promises from public committee minutes with AWS, and shows any resident, buyer or ward officer the promise, the exact page it is written on, and a letter that asks for the plant to run.
 
-**Video (3 min):** VIDEO_LINK · **Live:** https://main.d36c2lel7ok0qn.amplifyapp.com (no sign-in) · WeMakeDevs x AWS Environmental Hacks 2026, Waste & Energy track
+**Video (2:59):** https://youtu.be/_HbZJ4fCaak · **Live:** https://main.d36c2lel7ok0qn.amplifyapp.com (no sign-in) · WeMakeDevs x AWS Environmental Hacks 2026, Waste & Energy track
+
+[![Watch the VACHAN demo on YouTube (2:59)](https://img.youtube.com/vi/_HbZJ4fCaak/maxresdefault.jpg)](https://youtu.be/_HbZJ4fCaak)
+
+[0:00](https://youtu.be/_HbZJ4fCaak?t=0) The problem · [0:36](https://youtu.be/_HbZJ4fCaak?t=36) The builder's written promise · [1:00](https://youtu.be/_HbZJ4fCaak?t=60) Live demo · [1:19](https://youtu.be/_HbZJ4fCaak?t=79) Ask for the plant to run · [1:31](https://youtu.be/_HbZJ4fCaak?t=91) Ward officers and human review · [1:50](https://youtu.be/_HbZJ4fCaak?t=110) How it works on AWS · [2:22](https://youtu.be/_HbZJ4fCaak?t=142) Proof step · [2:40](https://youtu.be/_HbZJ4fCaak?t=160) 735 t a day across Pune
 
 ![A promise card: 1,056 kg of wet waste a day, promised in writing to be treated in an organic waste converter, with the quoted line from the minutes, page 3, and the checks it passed](assets/card.jpg)
 
@@ -42,18 +46,18 @@ Every number here comes from [`stats.json`](https://d18hjofgs77fd1.cloudfront.ne
 ## How we used AWS
 | Service | Job | Why this service | In the video |
 |---|---|---|---|
-| Amazon EventBridge | Starts the pipeline every night at 02:00 IST | New minutes arrive weekly | 1:38 |
-| AWS Step Functions (Distributed Map) | Reads about 1,000 PDFs in parallel with retries and a failure budget | Scale, plus a run graph we can show | 1:38, 1:55 |
-| AWS Lambda (container image) | Crawl PARIVESH, read each PDF (`pdftotext`), split it into agenda items, publish, prove, draft letters | One image, five small handlers | 1:45 |
-| Amazon S3 + Amazon CloudFront | Mirror of every source PDF (named by SHA-256) and the JSON the website reads | PARIVESH has broken TLS and partly fails outside India; judges must still open the page | 1:45, 2:21 |
-| Amazon Textract | Reads minutes that are photographs of paper, where `pdftotext` finds no text | Without it, those meetings drop out silently | 1:55 |
-| Amazon Bedrock (Amazon Nova Pro) | Reads one project at a time into a fixed schema; drafts the letter | Telling operation-phase waste from construction-phase waste needs reading, not regex | 2:03, 1:10 |
-| Amazon Bedrock Guardrails | Stops any letter draft that uses one of 17 accusing words or phrases | A promise is not proof; a public letter tool must never accuse | 1:31 |
-| Amazon DynamoDB | One row per proposal per minutes PDF | Simple key writes from parallel workers | 2:21 |
-| Amazon Location Service (Places) | Address search for "promises near me" | Residents know their address, not survey numbers | 0:41 |
-| AWS Amplify Hosting | Hosts the website | A live link on an AWS domain | 2:38 |
-| AWS CDK (CloudFormation) + IAM | All of the above as one stack; GitHub Actions deploys over OIDC with no stored AWS keys | Repeatable setup, no secrets in the repo | 2:38 |
-| AWS Budgets + IAM | Alerts at $30, $48 and $60; at $50 an automatic deny policy stops Bedrock, Textract and new runs | A public, sign-in-free app must not run up a bill | |
+| Amazon EventBridge | Starts the pipeline every night at 02:00 IST | New minutes arrive weekly | [1:52](https://youtu.be/_HbZJ4fCaak?t=112) |
+| AWS Step Functions (Distributed Map) | Reads about 1,000 PDFs in parallel with retries and a failure budget | Scale, plus a run graph we can show | [1:54](https://youtu.be/_HbZJ4fCaak?t=114), [2:02](https://youtu.be/_HbZJ4fCaak?t=122) |
+| AWS Lambda (container image) | Crawl PARIVESH, read each PDF (`pdftotext`), split it into agenda items, publish, prove, draft letters | One image, five small handlers | [1:55](https://youtu.be/_HbZJ4fCaak?t=115), [2:23](https://youtu.be/_HbZJ4fCaak?t=143) |
+| Amazon S3 + Amazon CloudFront | Mirror of every source PDF (named by SHA-256) and the JSON the website reads | PARIVESH has broken TLS and partly fails outside India; judges must still open the page | [1:59](https://youtu.be/_HbZJ4fCaak?t=119), [2:22](https://youtu.be/_HbZJ4fCaak?t=142) |
+| Amazon Textract | Reads minutes that are photographs of paper, where `pdftotext` finds no text | Without it, those meetings drop out silently | [2:08](https://youtu.be/_HbZJ4fCaak?t=128) |
+| Amazon Bedrock (Amazon Nova Pro) | Reads one project at a time into a fixed schema; drafts the letter | Telling operation-phase waste from construction-phase waste needs reading, not regex | [2:10](https://youtu.be/_HbZJ4fCaak?t=130), [1:24](https://youtu.be/_HbZJ4fCaak?t=84) |
+| Amazon Bedrock Guardrails | Stops any letter draft that uses one of 17 accusing words or phrases | A promise is not proof; a public letter tool must never accuse | [1:46](https://youtu.be/_HbZJ4fCaak?t=106) |
+| Amazon DynamoDB | One row per proposal per minutes PDF | Simple key writes from parallel workers | [2:19](https://youtu.be/_HbZJ4fCaak?t=139) |
+| Amazon Location Service (Places) | Address search for "promises near me" | Residents know their address, not survey numbers | [1:00](https://youtu.be/_HbZJ4fCaak?t=60), [2:34](https://youtu.be/_HbZJ4fCaak?t=154) |
+| AWS Amplify Hosting | Hosts the website | A live link on an AWS domain | [2:32](https://youtu.be/_HbZJ4fCaak?t=152) |
+| AWS CDK (CloudFormation) + IAM | All of the above as one stack; GitHub Actions deploys over OIDC with no stored AWS keys | Repeatable setup, no secrets in the repo | [2:36](https://youtu.be/_HbZJ4fCaak?t=156) |
+| AWS Budgets + IAM | Alerts at $30, $48 and $60; at $50 an automatic deny policy stops Bedrock, Textract and new runs | A public, sign-in-free app must not run up a bill | not shown |
 
 **The model only reads. Plain code decides.** After Bedrock returns a record, deterministic checks run:
 - the figure must appear word for word on a "Wet waste" line;
@@ -143,13 +147,14 @@ VACHAN has three parts: what to build, how it looks, and how it runs. Each of us
 - **Claude Code:** coding partner for the pipeline, infrastructure, website and the video's animated scenes.
 - **ChatGPT and Codex image generation:** screen concepts only. Not shipped, except the link-preview image.
 - **Amazon Bedrock (Nova Pro):** reads the minutes and drafts the letters.
-- **ElevenLabs:** the narration voice in the video.
+- **faster-whisper** (open source): word timings, to sync the captions and animations to the narration.
 
 ## Credits and licences
 - Code: MIT (see `LICENSE`).
 - Minutes: PARIVESH, Ministry of Environment, Forest and Climate Change, Government of India (public documents).
 - Ward boundaries: DataMeet Municipal Spatial Data, CC BY-SA 2.5 IN (PMC 2022 wards also MIT via answerquest/pune-2022-wards).
 - Libraries: PDF.js (Apache-2.0), React and React Router (MIT). Poppler (GPL) runs as a command-line tool inside the Lambda image.
-- News headlines in the video: The Bridge Chronicle and Punekar News, credited on screen.
+- News in the video, credited on screen: The Bridge Chronicle (photo and the 300 t figure), Free Press Journal (PCMC figures), The Indian Express (the Moshi collapse), Punekar News and Maha eNews (the PCMC notice and fines).
+- Video: narrated by Siddhant in his own voice. The music bed and sound effects are synthesised in code for this video; no stock audio.
 - Fonts: Fraunces, Courier Prime, Kalam, Noto Serif Devanagari (SIL Open Font License, via Google Fonts).
 - Desk props: modelled and rendered in Blender (`props/`).
